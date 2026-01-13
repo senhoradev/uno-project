@@ -1,16 +1,14 @@
+// src/app.js
 const express = require('express');
 const playerRoutes = require('./routes/playerRoutes');
-const sequelize = require('./config/database');
 
 const app = express();
+
+// Middleware
 app.use(express.json());
 
-// Rotas
+// Definição de Rotas
 app.use('/api/players', playerRoutes);
 
-// Sincronizar banco e iniciar servidor
-const PORT = 3000;
-sequelize.sync().then(() => {
-  console.log('Banco de dados conectado e sincronizado.');
-  app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
-});
+// Exportamos o 'app' para que o server.js ou arquivos de teste possam usá-lo
+module.exports = app;

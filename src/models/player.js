@@ -1,6 +1,7 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const { DataTypes } = require('sequelize'); // Importa os tipos de dados do Sequelize para definir os campos do modelo
+const sequelize = require('../config/database'); 
 
+// Define o modelo 'Player' da tabela no banco de dados
 const Player = sequelize.define('Player', {
   name: {
     type: DataTypes.STRING,
@@ -17,4 +18,4 @@ const Player = sequelize.define('Player', {
   }
 });
 
-module.exports = Player;
+module.exports = Player; // Exporta o modelo para ser utilizado nos controllers e services

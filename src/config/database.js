@@ -1,4 +1,5 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize } = require('sequelize'); // Carrega as variáveis de ambiente do arquivo .env para o process.env
+
 require('dotenv').config();
 
 const sequelize = new Sequelize(
@@ -12,4 +13,4 @@ const sequelize = new Sequelize(
   }
 );
 
-module.exports = sequelize;
+module.exports = sequelize; // Exporta a instância do Sequelize para ser usada em outros arquivos
