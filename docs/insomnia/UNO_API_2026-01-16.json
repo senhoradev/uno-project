@@ -1,0 +1,306 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-01-16T12:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v2023.5.8",
+  "resources": [
+    {
+      "_id": "wrk_rsvdg",
+      "parentId": null,
+      "modified": 1705403200000,
+      "created": 1705403200000,
+      "name": "RSVDG - UNO API",
+      "description": "Collection completa da API do projeto UNO",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "fld_games",
+      "parentId": "wrk_rsvdg",
+      "modified": 1705403200000,
+      "created": 1705403200000,
+      "name": "Games",
+      "description": "CRUD de Jogos",
+      "environment": {},
+      "metaSortKey": -1000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_create_game",
+      "parentId": "fld_games",
+      "url": "http://localhost:3000/api/games",
+      "name": "Create Game",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_game",
+      "parentId": "fld_games",
+      "url": "http://localhost:3000/api/games/1",
+      "name": "Get Game by ID",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_game",
+      "parentId": "fld_games",
+      "url": "http://localhost:3000/api/games/1",
+      "name": "Update Game",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"UNO Atualizado\",\n  \"status\": \"finished\",\n  \"maxPlayers\": 6\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_delete_game",
+      "parentId": "fld_games",
+      "url": "http://localhost:3000/api/games/1",
+      "name": "Delete Game",
+      "method": "DELETE",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "fld_players",
+      "parentId": "wrk_rsvdg",
+      "modified": 1705403200000,
+      "created": 1705403200000,
+      "name": "Players",
+      "description": "CRUD de Jogadores",
+      "environment": {},
+      "metaSortKey": -900,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_create_player",
+      "parentId": "fld_players",
+      "url": "http://localhost:3000/api/players",
+      "name": "Create Player",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Grazi\",\n  \"age\": 25,\n  \"email\": \"grazi@email.com\"\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_player",
+      "parentId": "fld_players",
+      "url": "http://localhost:3000/api/players/1",
+      "name": "Get Player by ID",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_player",
+      "parentId": "fld_players",
+      "url": "http://localhost:3000/api/players/1",
+      "name": "Update Player",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Grazi Atualizado\",\n  \"age\": 26,\n  \"email\": \"grazi.novo@email.com\"\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_delete_player",
+      "parentId": "fld_players",
+      "url": "http://localhost:3000/api/players/1",
+      "name": "Delete Player",
+      "method": "DELETE",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "fld_cards",
+      "parentId": "wrk_rsvdg",
+      "modified": 1705403200000,
+      "created": 1705403200000,
+      "name": "Cards",
+      "description": "CRUD de Cartas",
+      "environment": {},
+      "metaSortKey": -800,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_create_card",
+      "parentId": "fld_cards",
+      "url": "http://localhost:3000/api/cards",
+      "name": "Create Card",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"color\": \"red\",\n  \"action\": \"7\",\n  \"gameId\": 1\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_card",
+      "parentId": "fld_cards",
+      "url": "http://localhost:3000/api/cards/1",
+      "name": "Get Card by ID",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_card",
+      "parentId": "fld_cards",
+      "url": "http://localhost:3000/api/cards/1",
+      "name": "Update Card",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"color\": \"blue\",\n  \"action\": \"skip\",\n  \"gameId\": 1\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_delete_card",
+      "parentId": "fld_cards",
+      "url": "http://localhost:3000/api/cards/1",
+      "name": "Delete Card",
+      "method": "DELETE",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "fld_scoring",
+      "parentId": "wrk_rsvdg",
+      "modified": 1705403200000,
+      "created": 1705403200000,
+      "name": "Scoring History",
+      "description": "CRUD de Histórico de Pontuação",
+      "environment": {},
+      "metaSortKey": -700,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_create_scoring",
+      "parentId": "fld_scoring",
+      "url": "http://localhost:3000/api/scoring-history",
+      "name": "Create Scoring",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"playerId\": 1,\n  \"gameId\": 1,\n  \"score\": 100\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_get_scoring",
+      "parentId": "fld_scoring",
+      "url": "http://localhost:3000/api/scoring-history/1",
+      "name": "Get Scoring by ID",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "req_update_scoring",
+      "parentId": "fld_scoring",
+      "url": "http://localhost:3000/api/scoring-history/1",
+      "name": "Update Scoring",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"score\": 150\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_delete_scoring",
+      "parentId": "fld_scoring",
+      "url": "http://localhost:3000/api/scoring-history/1",
+      "name": "Delete Scoring",
+      "method": "DELETE",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    },
+    {
+      "_id": "fld_validation",
+      "parentId": "wrk_rsvdg",
+      "modified": 1705403200000,
+      "created": 1705403200000,
+      "name": "Testes de Validação",
+      "description": "Testes de erro e validação",
+      "environment": {},
+      "metaSortKey": -600,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_error_empty_title",
+      "parentId": "fld_validation",
+      "url": "http://localhost:3000/api/games",
+      "name": "Game - Título Vazio",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_error_invalid_status",
+      "parentId": "fld_validation",
+      "url": "http://localhost:3000/api/games",
+      "name": "Game - Status Inválido",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"UNO\",\n  \"status\": \"invalid\",\n  \"maxPlayers\": 4\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_error_max_players",
+      "parentId": "fld_validation",
+      "url": "http://localhost:3000/api/games",
+      "name": "Game - MaxPlayers > 10",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"title\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 15\n}"
+      },
+      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "_type": "request"
+    },
+    {
+      "_id": "req_error_not_found",
+      "parentId": "fld_validation",
+      "url": "http://localhost:3000/api/games/9999",
+      "name": "Game - Not Found",
+      "method": "GET",
+      "body": {},
+      "headers": [],
+      "_type": "request"
+    }
+  ]
+}
