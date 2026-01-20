@@ -27,6 +27,10 @@ class ScoringHistoryService {
     await score.destroy();
     return { message: 'Score removido com sucesso' };
   }
+
+  async createscoringHistory(data) {
+    return await scoringHistory.create(data);
+  }
 }
  
 // Exporta uma instância única do serviço para ser usada
