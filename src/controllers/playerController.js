@@ -1,5 +1,35 @@
 const playerService = require('../services/playerService');
 
+exports.register = async (req, res) => {
+  try {
+    await playerService.createPlayer(req.body);
+    res.status(201).json({ message: 'Jogador registrado com sucesso' });
+  }
+  catch (error) {
+    if (error.message === 'User already exists')
+      return res.status(400).json({ error: "user already exists" });
+  }
+  res.status(400).json({ error: error.message });
+};
+
+exports.login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const result = await playerService.login(username, password);
+    
+    // Retorna o token de acesso em caso de sucesso
+    res.json(result);
+  } catch (error) {
+    // Retorna erro de credenciais inválidas conforme solicitado
+    if (error.message === 'Invalid credentials') {
+      return res.status(401).json({
+        "error": "Invalid credentials"
+      });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     const player = await playerService.createPlayer(req.body);

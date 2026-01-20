@@ -1,9 +1,29 @@
 const Player = require('../models/Player');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 
 class PlayerService {
   // Cria um novo player recebendo os dados do controller
   async createPlayer(data) { 
-    return await Player.create(data);
+    const { username, email, password} = data;
+
+    const existingPlayer = await Player.findOne({ where: { username, email } });
+    if(existingPlayer) throw new Error('Usuário já existe');
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    return await Player.create({data, password: hashedPassword});
+  }
+
+  async login(username, password) {
+    const player = await Player.findOne({ where: { username } });
+    if (!player || !(await bcrypt.compare(password, player.password))) 
+      {throw new Error('Credenciais inválidas');}
+
+    const token = jwt.sign({ id: player.id, username: player.username}, process.env.JWT_SECRET, { expiresIn: '3h' });
+    
+    return { access_token: token };
   }
 
   // Busca um jogador pelo ID
