@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const DB_NAME = process.env.DB_NAME || 'unodb';
 const DB_USER = process.env.DB_USER || 'root';
-const DB_PASS = process.env.DB_PASS || '';
+const DB_PASS = process.env.DB_PASS || '2706';
 const DB_HOST = process.env.DB_HOST || 'localhost';
 
 /**
