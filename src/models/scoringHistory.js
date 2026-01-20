@@ -6,7 +6,7 @@ const sequelize = require('../config/database');
 const ScoringHistory = sequelize.define('ScoringHistory', {
  
   playerId: {
-    type: DataTypes.STRING,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   gameId: {
