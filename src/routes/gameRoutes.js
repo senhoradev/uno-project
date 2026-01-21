@@ -12,26 +12,40 @@ const express = require('express');
 const router = express.Router();
 
 const gameController = require('../controllers/gameController');
+const auth = require('../middlewares/auth'); // Middleware necessário para validar o token
 
 /**
  * @route POST /api/games
- * @description Cria um novo jogo
- * @access Public
- * @body {string} title - Título do jogo (obrigatório)
- * @body {string} [status='active'] - Status do jogo
- * @body {number} [maxPlayers=4] - Número máximo de jogadores
- * @returns {Object} 201 - Jogo criado com sucesso
- * @returns {Object} 400 - Erro de validação
+ * @description 5. Criar um novo jogo
+ * @access Private (Requer Token)
+ * @body {string} name - Nome do jogo (obrigatório)
+ * @body {string} [rules] - Regras do jogo
+ * @returns {Object} 201 - Jogo criado com sucesso e game_id
  */
-router.post('/', gameController.create);
+router.post('/', auth, gameController.create);
+
+/**
+ * @route POST /api/games/join
+ * @description 6. Juntar-se a um jogo existente
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo para entrar
+ * @returns {Object} 200 - Usuário adicionado ao jogo com sucesso
+ */
+router.post('/join', auth, gameController.join);
+
+/**
+ * @route POST /api/games/start
+ * @description 7. Começar o jogo (apenas criador e todos prontos)
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo para iniciar
+ * @returns {Object} 200 - Jogo iniciado com sucesso
+ */
+router.post('/start', auth, gameController.start);
 
 /**
  * @route GET /api/games/:id
  * @description Busca um jogo pelo ID
  * @access Public
- * @param {string} id - ID do jogo
- * @returns {Object} 200 - Jogo encontrado
- * @returns {Object} 404 - Jogo não encontrado
  */
 router.get('/:id', gameController.getById);
 
@@ -39,12 +53,6 @@ router.get('/:id', gameController.getById);
  * @route PUT /api/games/:id
  * @description Atualiza um jogo existente
  * @access Public
- * @param {string} id - ID do jogo
- * @body {string} [title] - Novo título do jogo
- * @body {string} [status] - Novo status do jogo
- * @body {number} [maxPlayers] - Novo número máximo de jogadores
- * @returns {Object} 200 - Jogo atualizado com sucesso
- * @returns {Object} 400 - Erro de validação
  */
 router.put('/:id', gameController.update);
 
@@ -52,9 +60,6 @@ router.put('/:id', gameController.update);
  * @route DELETE /api/games/:id
  * @description Remove um jogo do sistema
  * @access Public
- * @param {string} id - ID do jogo
- * @returns {Object} 200 - Jogo removido com sucesso
- * @returns {Object} 404 - Jogo não encontrado
  */
 router.delete('/:id', gameController.delete);
 
