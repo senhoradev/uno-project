@@ -4,13 +4,16 @@
  */
 
 const gameService = require('../services/gameService');
-const GameDTO = require('../middlewares/gameDTO');
+
 
 exports.create = async (req, res) => {
   try {
-    // O ID do usuário vem do middleware de autenticação (req.user)
     const game = await gameService.createGame(req.body, req.user.id);
-    return res.status(201).json({ message: "Game created successfully", game_id: game.id});
+    // Retorno manual conforme seu requisito nº 5
+    return res.status(201).json({ 
+      message: "Game created successfully", 
+      game_id: game.id 
+    });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -39,7 +42,14 @@ exports.start = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const game = await gameService.getGameById(req.params.id);
-    return res.json(new GameDTO(game));
+    // Retornando os dados sem a necessidade da classe DTO
+    return res.json({
+      id: game.id,
+      name: game.name,
+      rules: game.rules,
+      status: game.status,
+      maxPlayers: game.maxPlayers
+    });
   } catch (error) {
     return res.status(404).json({ error: error.message });
   }
