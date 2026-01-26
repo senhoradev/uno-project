@@ -4,7 +4,7 @@
  */
 
 const gameService = require('../services/gameService');
-const GameDTO = require('../middlewares/gameDTO');
+const GameDTO = require('../dtos/gameDTO');
 
 exports.create = async (req, res) => {
   try {
