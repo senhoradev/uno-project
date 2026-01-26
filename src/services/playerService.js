@@ -1,6 +1,7 @@
 const Player = require('../models/Player');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 
 
 class PlayerService {
@@ -8,12 +9,18 @@ class PlayerService {
   async createPlayer(data) { 
     const { username, email, password} = data;
 
-    const existingPlayer = await Player.findOne({ where: { username, email } });
+    if (!password || password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres');
+
+    const existingPlayer = await Player.findOne({ 
+      where: { 
+        [Op.or]: [{ username }, { email }] 
+      } 
+    });
     if(existingPlayer) throw new Error('Usuário já existe');
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    return await Player.create({data, password: hashedPassword});
+    return await Player.create({ ...data, password: hashedPassword });
   }
 
   async login(username, password) {
@@ -24,6 +31,15 @@ class PlayerService {
     const token = jwt.sign({ id: player.id, username: player.username}, process.env.JWT_SECRET, { expiresIn: '3h' });
     
     return { access_token: token };
+  }
+
+  async getProfile(token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      return await this.getPlayerById(decoded.id);
+    } catch (error) {
+      throw new Error('Token inválido ou expirado');
+    }
   }
 
   // Busca um jogador pelo ID

@@ -23,7 +23,7 @@ class ScoringHistoryService {
   // Remove um score do banco de dados
   async deleteScore(id) {
     // Busca o score para garantir que ele existe antes da exclusão
-    const score = await this.getPlayerById(id);
+    const score = await this.getScoreById(id);
     await score.destroy();
     return { message: 'Score removido com sucesso' };
   }

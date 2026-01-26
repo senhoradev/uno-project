@@ -94,7 +94,11 @@ const Game = sequelize.define('Game', {
    */
   creatorId: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      isInt: { msg: "O ID do criador deve ser um número inteiro." },
+      notNull: { msg: "O ID do criador é obrigatório." }
+    }
   }
 });
 

@@ -22,6 +22,10 @@ class SignUpService {
   async register(data) {
     const { username, email, password } = data;
 
+    if (!password || password.length < 6) {
+      throw new Error('Password must be at least 6 characters long');
+    }
+
     // Verifica no banco de dados se já existe um jogador com o mesmo username ou email
     const existingPlayer = await Player.findOne({
       where: {

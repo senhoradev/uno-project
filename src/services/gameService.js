@@ -22,6 +22,7 @@ class GameService {
     const game = await Game.create({
       name: data.name,
       rules: data.rules,
+      maxPlayers: data.maxPlayers, // Permite definir o limite de jogadores respeitando as validações do Model
       creatorId: creatorId,
       status: 'waiting' // Jogo começa aguardando jogadores
     });
@@ -49,6 +50,12 @@ class GameService {
 
     if (game.status !== 'waiting') {
       throw new Error('Não é possível entrar em um jogo que já iniciou ou finalizou');
+    }
+
+    // Verifica se o jogo já atingiu o número máximo de jogadores
+    const currentPlayers = await GamePlayer.count({ where: { gameId } });
+    if (currentPlayers >= game.maxPlayers) {
+      throw new Error('O jogo está cheio');
     }
 
     // Verifica se o usuário já está no jogo

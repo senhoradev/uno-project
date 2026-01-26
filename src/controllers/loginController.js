@@ -3,7 +3,7 @@
  * @module controllers/loginController
  */
 
-const loginService = require('../services/loginService');
+const playerService = require('../services/playerService');
 
 /**
  * Realiza a autenticação do usuário.
@@ -19,7 +19,7 @@ exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
     // Chama o serviço de autenticação para verificar credenciais e gerar token
-    const result = await loginService.authenticate(username, password);
+    const result = await playerService.login(username, password);
     return res.json(result);
   } catch (error) {
     // Retorna 401 Unauthorized se as credenciais forem inválidas
@@ -57,7 +57,7 @@ exports.profile = async (req, res) => {
   try {
     const { access_token } = req.body;
     // Decodifica o token para obter informações do usuário
-    const profile = await loginService.getProfile(access_token);
+    const profile = await playerService.getProfile(access_token);
     return res.json(profile);
   } catch (error) {
     return res.status(401).json({ error: error.message });
