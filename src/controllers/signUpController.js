@@ -4,6 +4,7 @@
  */
 
 const signUpService = require('../services/signUpService');
+const PlayerDTO = require('../dtos/playerDTO');
 
 /**
  * Registra um novo usuário no sistema.
@@ -16,11 +17,12 @@ const signUpService = require('../services/signUpService');
 exports.register = async (req, res) => {
   try {
     // Chama o serviço de registro passando os dados do corpo da requisição
-    await signUpService.register(req.body);
+    const newPlayer = await signUpService.register(req.body);
     
     // Retorna sucesso 201 Created se o registro for bem-sucedido
     return res.status(201).json({
-      message: "User registered successfully"
+      message: "User registered successfully",
+      user: new PlayerDTO(newPlayer)
     });
   } catch (error) {
     // Trata o erro específico de usuário já existente

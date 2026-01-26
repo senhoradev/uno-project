@@ -130,6 +130,15 @@ class GameService {
    */
   async updateGame(id, data) {
     const game = await this.getGameById(id);
+
+    // Validação: Não permitir diminuir maxPlayers abaixo da quantidade atual de jogadores
+    if (data.maxPlayers) {
+      const currentPlayersCount = await GamePlayer.count({ where: { gameId: id } });
+      if (data.maxPlayers < currentPlayersCount) {
+        throw new Error(`Não é possível reduzir o limite para ${data.maxPlayers} pois já existem ${currentPlayersCount} jogadores na partida.`);
+      }
+    }
+
     return await game.update(data);
   }
 

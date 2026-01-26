@@ -4,6 +4,7 @@
  */
 
 const playerService = require('../services/playerService');
+const PlayerDTO = require('../dtos/playerDTO');
 
 /**
  * Realiza a autenticação do usuário.
@@ -58,7 +59,7 @@ exports.profile = async (req, res) => {
     const { access_token } = req.body;
     // Decodifica o token para obter informações do usuário
     const profile = await playerService.getProfile(access_token);
-    return res.json(profile);
+    return res.json(new PlayerDTO(profile));
   } catch (error) {
     return res.status(401).json({ error: error.message });
   }

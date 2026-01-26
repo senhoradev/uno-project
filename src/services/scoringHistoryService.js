@@ -3,6 +3,9 @@ const scoringHistory = require('../models/scoringHistory');
 class ScoringHistoryService {
   // Cria um novo score recebendo os dados do controller
   async createScore(data) {
+    if (data.score === undefined || data.score === null) {
+      throw new Error('A pontuação (score) é obrigatória');
+    }
     return await scoringHistory.create(data);
   }
  
@@ -26,10 +29,6 @@ class ScoringHistoryService {
     const score = await this.getScoreById(id);
     await score.destroy();
     return { message: 'Score removido com sucesso' };
-  }
-
-  async createscoringHistory(data) {
-    return await scoringHistory.create(data);
   }
 }
  

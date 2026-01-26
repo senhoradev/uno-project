@@ -53,6 +53,13 @@ class PlayerService {
   async updatePlayer(id, data) {
     // Reutiliza o método getPlayerById para garantir que o jogador existe antes de atualizar
     const player = await this.getPlayerById(id);
+
+    // Se a senha estiver sendo atualizada, realiza a validação e o hash
+    if (data.password) {
+      if (data.password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres');
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
     return await player.update(data);
   }
 
