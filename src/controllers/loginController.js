@@ -19,11 +19,10 @@ const PlayerDTO = require('../DTO/Response/PlayerResponseDTO');
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    // Chama o serviço de autenticação para verificar credenciais e gerar token
     const result = await playerService.login(username, password);
-    return res.json(result);
+    return res.json(result); 
   } catch (error) {
-    // Retorna 401 Unauthorized se as credenciais forem inválidas
+    console.error("Erro no Login:", error.message); // Adicione isto para depurar
     return res.status(401).json({
       error: "Invalid credentials"
     });
@@ -57,10 +56,14 @@ exports.logout = async (req, res) => {
 exports.profile = async (req, res) => {
   try {
     const { access_token } = req.body;
-    // Decodifica o token para obter informações do usuário
     const profile = await playerService.getProfile(access_token);
-    return res.json(new PlayerDTO(profile));
+    
+    // Retorno manual para cumprir exatamente o Requisito 4
+    return res.json({
+      username: profile.username,
+      email: profile.email
+    });
   } catch (error) {
-    return res.status(401).json({ error: error.message });
+    return res.status(401).json({ error: "Invalid token" });
   }
 };
