@@ -3,7 +3,7 @@
  * @module services/signUpService
  */
 
-const Player = require('../models/Player');
+const Player = require('../models/player');
 const bcrypt = require('bcrypt');
 
 class SignUpService {

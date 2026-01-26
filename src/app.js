@@ -38,5 +38,19 @@ app.use('/api/scoring-history', scoringHistoryRoutes);
 // Rota para gerenciamento de partidas/jogos
 app.use('/api/games', gameRoutes);
 
+// Middleware de tratamento de erros global
+app.use((err, req, res, next) => {
+  console.error(err.stack); // Loga o erro no console para depuração
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  const status = err.status || 500;
+  const message = err.message || 'Internal Server Error';
+
+  res.status(status).json({ error: message });
+});
+
 // Exportamos o 'app' para que o server.js ou arquivos de teste possam usá-lo
 module.exports = app;

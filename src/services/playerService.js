@@ -1,4 +1,4 @@
-const Player = require('../models/Player');
+const Player = require('../models/player');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
@@ -20,7 +20,12 @@ class PlayerService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     
-    return await Player.create({ ...data, password: hashedPassword });
+    return await Player.create({ 
+      ...data, 
+      password: hashedPassword,
+      name: data.name || username, // Garante que name não seja nulo
+      age: data.age || 0           // Garante que age não seja nulo
+    });
   }
 
   async login(username, password) {

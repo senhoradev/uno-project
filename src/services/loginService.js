@@ -3,7 +3,7 @@
  * @module services/loginService
  */
 
-const Player = require('../models/Player');
+const Player = require('../models/player');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
