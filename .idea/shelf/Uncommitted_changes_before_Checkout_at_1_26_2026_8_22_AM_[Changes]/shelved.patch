@@ -1,0 +1,19 @@
+Index: src/config/database.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>const { Sequelize } = require('sequelize');\r\nconst mysql = require('mysql2/promise');\r\n\r\nrequire('dotenv').config();\r\n\r\nconst DB_NAME = process.env.DB_NAME || 'unodb';\r\nconst DB_USER = process.env.DB_USER || 'root';\r\nconst DB_PASS = process.env.DB_PASS || '';\r\nconst DB_HOST = process.env.DB_HOST || 'localhost';\r\n\r\n/**\r\n * Cria o banco de dados se não existir\r\n * @async\r\n * @returns {Promise<void>}\r\n */\r\nasync function createDatabaseIfNotExists() {\r\n  try {\r\n    const connection = await mysql.createConnection({\r\n      host: DB_HOST,\r\n      user: DB_USER,\r\n      password: DB_PASS\r\n    });\r\n    \r\n    await connection.query(`CREATE DATABASE IF NOT EXISTS \\`${DB_NAME}\\`;`);\r\n    console.log(`Banco de dados '${DB_NAME}' verificado/criado com sucesso.`);\r\n    await connection.end();\r\n  } catch (error) {\r\n    console.error('Erro ao criar banco de dados:', error.message);\r\n    throw error;\r\n  }\r\n}\r\n\r\nconst sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {\r\n  host: DB_HOST,\r\n  dialect: 'mysql',\r\n  logging: false\r\n});\r\n\r\nmodule.exports = sequelize;\r\nmodule.exports.createDatabaseIfNotExists = createDatabaseIfNotExists;
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/config/database.js b/src/config/database.js
+--- a/src/config/database.js	(revision 96116d8cf1afcc4530612e2ebc2e9509cd93d5a7)
++++ b/src/config/database.js	(date 1769426345303)
+@@ -5,7 +5,7 @@
+ 
+ const DB_NAME = process.env.DB_NAME || 'unodb';
+ const DB_USER = process.env.DB_USER || 'root';
+-const DB_PASS = process.env.DB_PASS || '';
++const DB_PASS = process.env.DB_PASS || '1214@Vgala';
+ const DB_HOST = process.env.DB_HOST || 'localhost';
+ 
+ /**
