@@ -34,6 +34,15 @@ router.post('/', auth, gameController.create);
 router.post('/join', auth, gameController.join);
 
 /**
+ * @route POST /api/games/ready
+ * @description Alterna o status de "pronto" do jogador no jogo
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Status de ready atualizado
+ */
+router.post('/ready', auth, gameController.toggleReady);
+
+/**
  * @route POST /api/games/start
  * @description 7. Começar o jogo (apenas criador e todos prontos)
  * @access Private (Requer Token)

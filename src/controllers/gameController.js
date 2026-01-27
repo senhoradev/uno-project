@@ -29,6 +29,21 @@ exports.join = async (req, res) => {
   }
 };
 
+/**
+ * Alterna o status de "pronto" do jogador no jogo
+ */
+exports.toggleReady = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const result = await gameService.toggleReady(game_id, req.user.id);
+    return res.json({ 
+      message: result.message,
+      isReady: result.isReady 
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
 
 
 exports.start = async (req, res) => {

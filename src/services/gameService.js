@@ -5,6 +5,7 @@
 
 const Game = require('../models/game');
 const GamePlayer = require('../models/gamePlayer'); // Importante para gerenciar os participantes
+const Player = require('../models/player');
 
 /**
  * Classe de serviço para operações de Game
@@ -75,6 +76,41 @@ class GameService {
     });
 
     return true;
+  }
+
+  /**
+   * Alterna o status de "pronto" de um jogador no jogo
+   * @async
+   * @param {number} gameId - ID do jogo
+   * @param {number} playerId - ID do jogador
+   * @returns {Promise<Object>} Objeto com o novo status de isReady
+   * @throws {Error} Se o jogador não estiver no jogo ou o jogo não estiver em espera
+   */
+  async toggleReady(gameId, playerId) {
+    const game = await this.getGameById(gameId);
+
+    // Verifica se o jogo está em fase de espera
+    if (game.status !== 'waiting') {
+      throw new Error('Não é possível alterar o status de pronto em um jogo que já iniciou ou finalizou');
+    }
+
+    // Verifica se o usuário está no jogo
+    const gamePlayer = await GamePlayer.findOne({ 
+      where: { gameId, playerId } 
+    });
+    
+    if (!gamePlayer) {
+      throw new Error('Usuário não está neste jogo');
+    }
+
+    // Alterna o status de isReady
+    const newReadyStatus = !gamePlayer.isReady;
+    await gamePlayer.update({ isReady: newReadyStatus });
+
+    return { 
+      isReady: newReadyStatus,
+      message: newReadyStatus ? 'Você está pronto!' : 'Você não está mais pronto'
+    };
   }
 
   /**
