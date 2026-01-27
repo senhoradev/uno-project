@@ -13,7 +13,12 @@
           "name": "SignUp",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"username\": \"safira\",\n  \"email\": \"safira@email.com\",\n  \"password\": \"121418\",\n  \"name\": \"Safira\",\n  \"age\": 22\n}",
@@ -26,18 +31,38 @@
             "url": {
               "raw": "{{url}}{{signup}}",
               "host": ["{{url}}{{signup}}"]
-            }
+            },
+            "description": "Registra um novo usuário no sistema"
           },
           "response": []
         },
         {
           "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set(\"token\", jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"username\": \"nvitor142004\",\n  \"password\": \"1214100116\"\n}",
+              "raw": "{\n  \"username\": \"safira\",\n  \"password\": \"121418\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -47,7 +72,8 @@
             "url": {
               "raw": "{{url}}{{login}}",
               "host": ["{{url}}{{login}}"]
-            }
+            },
+            "description": "Autentica o usuário e retorna um token JWT"
           },
           "response": []
         },
@@ -55,11 +81,26 @@
           "name": "Logout",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
             "url": {
               "raw": "{{url}}{{logout}}",
               "host": ["{{url}}{{logout}}"]
-            }
+            },
+            "description": "Encerra a sessão do usuário"
           },
           "response": []
         },
@@ -71,7 +112,8 @@
             "url": {
               "raw": "{{url}}{{profile}}",
               "host": ["{{url}}{{profile}}"]
-            }
+            },
+            "description": "Retorna os dados do usuário autenticado"
           },
           "response": []
         }
@@ -81,6 +123,19 @@
       "name": "/api/games",
       "item": [
         {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            },
+            "description": "Lista todos os jogos"
+          },
+          "response": []
+        },
+        {
           "name": "getById",
           "request": {
             "method": "GET",
@@ -89,7 +144,8 @@
               "raw": "{{url}}{{games}}/1",
               "host": ["{{url}}{{games}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Busca um jogo pelo ID"
           },
           "response": []
         },
@@ -97,10 +153,15 @@
           "name": "post",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}",
+              "raw": "{\n  \"name\": \"Partida UNO #1\",\n  \"maxPlayers\": 4\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -110,7 +171,8 @@
             "url": {
               "raw": "{{url}}{{games}}",
               "host": ["{{url}}{{games}}"]
-            }
+            },
+            "description": "Cria um novo jogo. O criador entra automaticamente."
           },
           "response": []
         },
@@ -118,10 +180,15 @@
           "name": "put",
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"UNO Atualizado\",\n  \"status\": \"finished\",\n  \"maxPlayers\": 6\n}",
+              "raw": "{\n  \"name\": \"Partida UNO Atualizada\",\n  \"status\": \"in_progress\",\n  \"maxPlayers\": 6\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -132,7 +199,8 @@
               "raw": "{{url}}{{games}}/1",
               "host": ["{{url}}{{games}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Atualiza um jogo existente. Status válidos: waiting, in_progress, finished, cancelled"
           },
           "response": []
         },
@@ -145,7 +213,8 @@
               "raw": "{{url}}{{games}}/1",
               "host": ["{{url}}{{games}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Remove um jogo pelo ID"
           },
           "response": []
         },
@@ -153,7 +222,12 @@
           "name": "joinGame",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
               "raw": "{\n  \"gameId\": 1\n}",
@@ -166,7 +240,62 @@
             "url": {
               "raw": "{{url}}{{joingame}}",
               "host": ["{{url}}{{joingame}}"]
-            }
+            },
+            "description": "Entra em um jogo existente"
+          },
+          "response": []
+        },
+        {
+          "name": "toggleReady",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/toggle-ready",
+              "host": ["{{url}}{{games}}/toggle-ready"]
+            },
+            "description": "Alterna o status de pronto do jogador"
+          },
+          "response": []
+        },
+        {
+          "name": "startGame",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/start",
+              "host": ["{{url}}{{games}}/start"]
+            },
+            "description": "Inicia o jogo. Apenas o criador pode iniciar e todos devem estar prontos."
           },
           "response": []
         }
@@ -176,6 +305,19 @@
       "name": "/api/players",
       "item": [
         {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            },
+            "description": "Lista todos os jogadores"
+          },
+          "response": []
+        },
+        {
           "name": "getById",
           "request": {
             "method": "GET",
@@ -184,7 +326,8 @@
               "raw": "{{url}}{{players}}/1",
               "host": ["{{url}}{{players}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Busca um jogador pelo ID"
           },
           "response": []
         },
@@ -192,10 +335,15 @@
           "name": "post",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Grazi\",\n  \"age\": 25,\n  \"email\": \"grazi@email.com\"\n}",
+              "raw": "{\n  \"username\": \"grazi_player\",\n  \"email\": \"grazi@email.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Grazi\",\n  \"age\": 25\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -205,7 +353,8 @@
             "url": {
               "raw": "{{url}}{{players}}",
               "host": ["{{url}}{{players}}"]
-            }
+            },
+            "description": "Cria um novo jogador"
           },
           "response": []
         },
@@ -213,10 +362,15 @@
           "name": "put",
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Grazi Atualizado\",\n  \"age\": 26,\n  \"email\": \"grazi.novo@email.com\"\n}",
+              "raw": "{\n  \"username\": \"grazi_updated\",\n  \"email\": \"grazi.novo@email.com\",\n  \"name\": \"Grazi Atualizada\",\n  \"age\": 26\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -227,7 +381,8 @@
               "raw": "{{url}}{{players}}/1",
               "host": ["{{url}}{{players}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Atualiza um jogador existente"
           },
           "response": []
         },
@@ -240,7 +395,8 @@
               "raw": "{{url}}{{players}}/1",
               "host": ["{{url}}{{players}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Remove um jogador pelo ID"
           },
           "response": []
         }
@@ -250,6 +406,19 @@
       "name": "/api/cards",
       "item": [
         {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{cards}}",
+              "host": ["{{url}}{{cards}}"]
+            },
+            "description": "Lista todas as cartas"
+          },
+          "response": []
+        },
+        {
           "name": "getById",
           "request": {
             "method": "GET",
@@ -258,7 +427,8 @@
               "raw": "{{url}}{{cards}}/1",
               "host": ["{{url}}{{cards}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Busca uma carta pelo ID"
           },
           "response": []
         },
@@ -266,10 +436,15 @@
           "name": "post",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"color\": \"red\",\n  \"action\": \"7\",\n  \"gameId\": 1\n}",
+              "raw": "{\n  \"color\": \"red\",\n  \"action\": \"draw_two\",\n  \"value\": \"7\",\n  \"type\": \"number\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -279,7 +454,8 @@
             "url": {
               "raw": "{{url}}{{cards}}",
               "host": ["{{url}}{{cards}}"]
-            }
+            },
+            "description": "Cria uma nova carta. Cores: red, blue, green, yellow, wild. Tipos: number, skip, reverse, draw_two, wild, wild_draw_four"
           },
           "response": []
         },
@@ -287,10 +463,15 @@
           "name": "put",
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"color\": \"blue\",\n  \"action\": \"skip\",\n  \"gameId\": 1\n}",
+              "raw": "{\n  \"color\": \"blue\",\n  \"value\": \"skip\",\n  \"type\": \"skip\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -301,7 +482,8 @@
               "raw": "{{url}}{{cards}}/1",
               "host": ["{{url}}{{cards}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Atualiza uma carta existente"
           },
           "response": []
         },
@@ -314,7 +496,8 @@
               "raw": "{{url}}{{cards}}/1",
               "host": ["{{url}}{{cards}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Remove uma carta pelo ID"
           },
           "response": []
         }
@@ -324,6 +507,19 @@
       "name": "/api/scoring-history",
       "item": [
         {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}",
+              "host": ["{{url}}{{score}}"]
+            },
+            "description": "Lista todo o histórico de pontuações"
+          },
+          "response": []
+        },
+        {
           "name": "getById",
           "request": {
             "method": "GET",
@@ -332,7 +528,36 @@
               "raw": "{{url}}{{score}}/1",
               "host": ["{{url}}{{score}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Busca uma pontuação pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "getByPlayerId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/player/1",
+              "host": ["{{url}}{{score}}/player"],
+              "path": ["1"]
+            },
+            "description": "Busca pontuações de um jogador específico"
+          },
+          "response": []
+        },
+        {
+          "name": "getByGameId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/game/1",
+              "host": ["{{url}}{{score}}/game"],
+              "path": ["1"]
+            },
+            "description": "Busca pontuações de um jogo específico"
           },
           "response": []
         },
@@ -340,10 +565,15 @@
           "name": "post",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"playerId\": 1,\n  \"gameId\": 1,\n  \"score\": 100\n}",
+              "raw": "{\n  \"playerId\": 1,\n  \"gameId\": 1,\n  \"score\": 100,\n  \"position\": 1,\n  \"isWinner\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -353,7 +583,8 @@
             "url": {
               "raw": "{{url}}{{score}}",
               "host": ["{{url}}{{score}}"]
-            }
+            },
+            "description": "Registra uma nova pontuação"
           },
           "response": []
         },
@@ -361,10 +592,15 @@
           "name": "put",
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"score\": 150\n}",
+              "raw": "{\n  \"score\": 150,\n  \"position\": 2,\n  \"isWinner\": false\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -375,7 +611,8 @@
               "raw": "{{url}}{{score}}/1",
               "host": ["{{url}}{{score}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Atualiza uma pontuação existente"
           },
           "response": []
         },
@@ -388,7 +625,8 @@
               "raw": "{{url}}{{score}}/1",
               "host": ["{{url}}{{score}}"],
               "path": ["1"]
-            }
+            },
+            "description": "Remove uma pontuação pelo ID"
           },
           "response": []
         }
@@ -401,10 +639,15 @@
           "name": "Game - Titulo Vazio",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}",
+              "raw": "{\n  \"name\": \"\",\n  \"maxPlayers\": 4\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -414,18 +657,24 @@
             "url": {
               "raw": "{{url}}{{games}}",
               "host": ["{{url}}{{games}}"]
-            }
+            },
+            "description": "Deve retornar erro 400 - título obrigatório"
           },
           "response": []
         },
         {
           "name": "Game - Status Invalido",
           "request": {
-            "method": "POST",
-            "header": [],
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"invalid\",\n  \"maxPlayers\": 4\n}",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"invalid_status\",\n  \"maxPlayers\": 4\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -433,9 +682,11 @@
               }
             },
             "url": {
-              "raw": "{{url}}{{games}}",
-              "host": ["{{url}}{{games}}"]
-            }
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            },
+            "description": "Deve retornar erro 400 - status inválido"
           },
           "response": []
         },
@@ -443,10 +694,15 @@
           "name": "Game - MaxPlayers maior que 10",
           "request": {
             "method": "POST",
-            "header": [],
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 15\n}",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"maxPlayers\": 15\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -456,7 +712,35 @@
             "url": {
               "raw": "{{url}}{{games}}",
               "host": ["{{url}}{{games}}"]
-            }
+            },
+            "description": "Deve retornar erro 400 - maxPlayers deve ser entre 2 e 10"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - MaxPlayers menor que 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"maxPlayers\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            },
+            "description": "Deve retornar erro 400 - maxPlayers deve ser entre 2 e 10"
           },
           "response": []
         },
@@ -469,7 +753,116 @@
               "raw": "{{url}}{{games}}/9999",
               "host": ["{{url}}{{games}}"],
               "path": ["9999"]
-            }
+            },
+            "description": "Deve retornar erro 404 - jogo não encontrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Player - Email Invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test_user\",\n  \"email\": \"email-invalido\",\n  \"password\": \"senha123\",\n  \"name\": \"Teste\",\n  \"age\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            },
+            "description": "Deve retornar erro 400 - email inválido"
+          },
+          "response": []
+        },
+        {
+          "name": "Player - Username Vazio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"\",\n  \"email\": \"teste@email.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Teste\",\n  \"age\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            },
+            "description": "Deve retornar erro 400 - username obrigatório"
+          },
+          "response": []
+        },
+        {
+          "name": "Card - Cor Invalida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"purple\",\n  \"value\": \"5\",\n  \"type\": \"number\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{cards}}",
+              "host": ["{{url}}{{cards}}"]
+            },
+            "description": "Deve retornar erro 400 - cor inválida (válidas: red, blue, green, yellow, wild)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Credenciais Invalidas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"usuario_inexistente\",\n  \"password\": \"senha_errada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{login}}",
+              "host": ["{{url}}{{login}}"]
+            },
+            "description": "Deve retornar erro 401 - credenciais inválidas"
           },
           "response": []
         }
