@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 3000;
 
 // Primeiro cria o banco se não existir, depois sincroniza e inicia o servidor
 createDatabaseIfNotExists()
-  .then(() => sequelize.sync({alter: true}))
+  .then(() => sequelize.sync()) // b4 sequelize.sync({ alter: true })
   .then(async () => {
     console.log('Banco de dados conectado e sincronizado.');
     

@@ -1,0 +1,551 @@
+{
+  "info": {
+    "_postman_id": "rsvdg-uno-api",
+    "name": "RSVDG - UNO API",
+    "description": "Collection completa da API do projeto UNO",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "SignUp",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"safira\",\n  \"email\": \"safira@email.com\",\n  \"password\": \"121418\",\n  \"name\": \"Safira\",\n  \"age\": 22\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{signup}}",
+              "host": ["{{url}}{{signup}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nvitor142004\",\n  \"password\": \"1214100116\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{login}}",
+              "host": ["{{url}}{{login}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{logout}}",
+              "host": ["{{url}}{{logout}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{profile}}",
+              "host": ["{{url}}{{profile}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/games",
+      "item": [
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO Atualizado\",\n  \"status\": \"finished\",\n  \"maxPlayers\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "joinGame",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{joingame}}",
+              "host": ["{{url}}{{joingame}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/players",
+      "item": [
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{players}}/1",
+              "host": ["{{url}}{{players}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grazi\",\n  \"age\": 25,\n  \"email\": \"grazi@email.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Grazi Atualizado\",\n  \"age\": 26,\n  \"email\": \"grazi.novo@email.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}/1",
+              "host": ["{{url}}{{players}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{players}}/1",
+              "host": ["{{url}}{{players}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/cards",
+      "item": [
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{cards}}/1",
+              "host": ["{{url}}{{cards}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"red\",\n  \"action\": \"7\",\n  \"gameId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{cards}}",
+              "host": ["{{url}}{{cards}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"blue\",\n  \"action\": \"skip\",\n  \"gameId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{cards}}/1",
+              "host": ["{{url}}{{cards}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{cards}}/1",
+              "host": ["{{url}}{{cards}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/scoring-history",
+      "item": [
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/1",
+              "host": ["{{url}}{{score}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": 1,\n  \"gameId\": 1,\n  \"score\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{score}}",
+              "host": ["{{url}}{{score}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 150\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{score}}/1",
+              "host": ["{{url}}{{score}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/1",
+              "host": ["{{url}}{{score}}"],
+              "path": ["1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Testes de Validacao",
+      "item": [
+        {
+          "name": "Game - Titulo Vazio",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Game - Status Invalido",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"invalid\",\n  \"maxPlayers\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Game - MaxPlayers maior que 10",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 15\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Game - Not Found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}/9999",
+              "host": ["{{url}}{{games}}"],
+              "path": ["9999"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "players",
+      "value": "/api/players"
+    },
+    {
+      "key": "games",
+      "value": "/api/games"
+    },
+    {
+      "key": "cards",
+      "value": "/api/cards"
+    },
+    {
+      "key": "score",
+      "value": "/api/scoring-history"
+    },
+    {
+      "key": "signup",
+      "value": "/api/signup"
+    },
+    {
+      "key": "login",
+      "value": "/api/auth/login"
+    },
+    {
+      "key": "logout",
+      "value": "/api/auth/logout"
+    },
+    {
+      "key": "profile",
+      "value": "/api/auth/profile"
+    },
+    {
+      "key": "joingame",
+      "value": "/api/games/join"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
