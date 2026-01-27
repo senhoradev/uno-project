@@ -65,7 +65,6 @@
                 "    <body>",
                 "        <div class='container'>",
                 "            <h3>Login realizado com sucesso!</h3>",
-                "            <p class='label'>access_token (clique na caixa e Ctrl+C ou use o botao):</p>",
                 "            <div class='token-box' id='tokenText' onclick='selectToken()'>{{token}}</div>",
                 "            <input type='text' id='hiddenInput' class='hidden-input' value='{{token}}' />",
                 "            <button class='copy-btn' onclick='copyToken()'>Copiar Token</button>",
