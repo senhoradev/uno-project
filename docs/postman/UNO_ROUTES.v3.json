@@ -230,7 +230,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"gameId\": 1\n}",
+              "raw": "{\n  \"game_id\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -246,33 +246,6 @@
           "response": []
         },
         {
-          "name": "toggleReady",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"gameId\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{url}}{{games}}/toggle-ready",
-              "host": ["{{url}}{{games}}/toggle-ready"]
-            },
-            "description": "Alterna o status de pronto do jogador"
-          },
-          "response": []
-        },
-        {
           "name": "startGame",
           "request": {
             "method": "POST",
@@ -284,7 +257,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"gameId\": 1\n}",
+              "raw": "{\n  \"game_id\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -296,6 +269,114 @@
               "host": ["{{url}}{{games}}/start"]
             },
             "description": "Inicia o jogo. Apenas o criador pode iniciar e todos devem estar prontos."
+          },
+          "response": []
+        },
+        {
+          "name": "leaveGame",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/leave",
+              "host": ["{{url}}{{games}}/leave"]
+            },
+            "description": "Abandona um jogo em progresso. Verifica se o jogo está em andamento e se o usuário é um jogador."
+          },
+          "response": []
+        },
+        {
+          "name": "endGame",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/end",
+              "host": ["{{url}}{{games}}/end"]
+            },
+            "description": "Finaliza um jogo. Apenas o criador pode encerrar e o jogo deve estar em andamento."
+          },
+          "response": []
+        },
+        {
+          "name": "getGameState",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/state",
+              "host": ["{{url}}{{games}}/state"]
+            },
+            "description": "Obtém o estado atual do jogo (waiting, in_progress, finished, cancelled)."
+          },
+          "response": []
+        },
+        {
+          "name": "getGamePlayers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/players",
+              "host": ["{{url}}{{games}}/players"]
+            },
+            "description": "Obtém a lista de jogadores no jogo."
           },
           "response": []
         }
@@ -444,7 +525,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"color\": \"red\",\n  \"action\": \"draw_two\",\n  \"value\": \"7\",\n  \"type\": \"number\"\n}",
+              "raw": "{\n  \"color\": \"red\",\n  \"value\": \"7\",\n  \"type\": \"number\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

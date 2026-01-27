@@ -78,6 +78,112 @@ class GameService {
   }
 
   /**
+   * Permite que um usuário abandone um jogo em progresso
+   * @async
+   * @param {number} gameId - ID do jogo
+   * @param {number} playerId - ID do usuário que deseja sair
+   * @returns {Promise<boolean>} Sucesso da operação
+   * @throws {Error} Se o jogo não estiver em andamento ou o usuário não estiver nele
+   */
+  async leaveGame(gameId, playerId) {
+    const game = await this.getGameById(gameId);
+
+    // Verifica se o jogo está em andamento
+    if (game.status !== 'in_progress' && game.status !== 'started') {
+      throw new Error('O jogo não está em andamento');
+    }
+
+    // Verifica se o usuário está no jogo
+    const playerInGame = await GamePlayer.findOne({ 
+      where: { gameId, playerId } 
+    });
+    
+    if (!playerInGame) {
+      throw new Error('Usuário não está neste jogo');
+    }
+
+    // Remove o jogador do jogo
+    await playerInGame.destroy();
+
+    // Verifica quantos jogadores restam
+    const remainingPlayers = await GamePlayer.count({ where: { gameId } });
+    
+    // Se restar apenas 1 jogador ou nenhum, finaliza o jogo
+    if (remainingPlayers <= 1) {
+      await game.update({ status: 'finished' });
+    }
+
+    return true;
+  }
+
+  /**
+   * Finaliza um jogo (apenas o criador pode finalizar)
+   * @async
+   * @param {number} gameId - ID do jogo
+   * @param {number} userId - ID do usuário que solicita a finalização
+   * @returns {Promise<boolean>} Sucesso da operação
+   * @throws {Error} Se não for o criador ou se o jogo não estiver em andamento
+   */
+  async endGame(gameId, userId) {
+    const game = await this.getGameById(gameId);
+
+    // Verifica se o usuário é o criador
+    if (game.creatorId !== userId) {
+      throw new Error('Apenas o criador do jogo pode encerrar a partida');
+    }
+
+    // Verifica se o jogo está em andamento
+    if (game.status !== 'in_progress' && game.status !== 'started') {
+      throw new Error('O jogo não está em andamento');
+    }
+
+    // Finaliza o jogo
+    await game.update({ status: 'finished' });
+    
+    return true;
+  }
+
+  /**
+   * Obtém o estado atual do jogo
+   * @async
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<Object>} Estado do jogo
+   */
+  async getGameState(gameId) {
+    const game = await this.getGameById(gameId);
+    
+    return {
+      game_id: game.id,
+      state: game.status
+    };
+  }
+
+  /**
+   * Obtém a lista de jogadores no jogo
+   * @async
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<Object>} Lista de jogadores
+   */
+  async getGamePlayers(gameId) {
+    const game = await this.getGameById(gameId);
+    
+    const gamePlayers = await GamePlayer.findAll({ 
+      where: { gameId },
+      include: [{
+        model: Player,
+        attributes: ['id', 'username']
+      }]
+    });
+
+    const players = gamePlayers.map(gp => gp.Player ? gp.Player.username : `Player${gp.playerId}`);
+    
+    return {
+      game_id: game.id,
+      players: players
+    };
+  }
+
+  /**
    * Inicia o jogo se o solicitante for o criador e todos estiverem prontos
    * @async
    * @param {number} gameId - ID do jogo

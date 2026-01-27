@@ -29,6 +29,8 @@ exports.join = async (req, res) => {
   }
 };
 
+
+
 exports.start = async (req, res) => {
   try {
     const { game_id } = req.body;
@@ -38,6 +40,59 @@ exports.start = async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 };
+
+/**
+ * Abandona um jogo em progresso
+ */
+exports.leave = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    await gameService.leaveGame(game_id, req.user.id);
+    return res.json({ message: 'User left the game successfully' });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Finaliza um jogo 
+ */
+exports.end = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    await gameService.endGame(game_id, req.user.id);
+    return res.json({ message: 'Game ended successfully' });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém o estado atual do jogo 
+ */
+exports.getState = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const state = await gameService.getGameState(game_id);
+    return res.json(state);
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém a lista de jogadores no jogo 
+ */
+exports.getPlayers = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const players = await gameService.getGamePlayers(game_id);
+    return res.json(players);
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+};
+
 
 exports.getById = async (req, res) => {
   try {

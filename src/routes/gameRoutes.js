@@ -41,6 +41,10 @@ router.post('/join', auth, gameController.join);
  * @returns {Object} 200 - Jogo iniciado com sucesso
  */
 router.post('/start', auth, gameController.start);
+router.post('/leave', auth, gameController.leave);
+router.post('/end', auth, gameController.end); 
+router.post('/state', auth, gameController.getState);
+router.post('/players', auth, gameController.getPlayers);
 
 /**
  * @route GET /api/games/:id
