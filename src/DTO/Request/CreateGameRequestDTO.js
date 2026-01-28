@@ -1,14 +1,14 @@
 class CreateGameRequestDTO {
-    constructor({ title, maxPlayers }) {
-        this.title = title;
+    constructor({ name, maxPlayers }) {
+        this.name = name;
         this.maxPlayers = maxPlayers;
     }
 
     validate() {
         const errors = [];
 
-        if (!this.title || this.title.trim() === '') {
-            errors.push('Title is required');
+        if (!this.name || this.name.trim() === '') {
+            errors.push('Name is required');
         }
 
         if (this.maxPlayers !== undefined) {
@@ -18,6 +18,10 @@ class CreateGameRequestDTO {
         }
 
         return errors;
+    }
+
+    static validate(requestBody) {
+        return new CreateGameRequestDTO(requestBody);
     }
 }
 

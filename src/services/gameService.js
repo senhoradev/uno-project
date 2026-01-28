@@ -294,4 +294,82 @@ class GameService {
   }
 }
 
-module.exports = new GameService();
+/**
+ * Obtém o jogador atual que deve jogar uma carta
+ * @param {number} gameId - ID do jogo
+ * @returns {Promise<string>} - Nome do jogador atual
+ */
+async function getCurrentPlayer(gameId) {
+  const game = await Game.findByPk(gameId, {
+    include: [{
+      model: Player,
+      through: { attributes: ['turnOrder'] },
+      order: [[{ model: Player, as: 'Players' }, 'turnOrder', 'ASC']]
+    }]
+  });
+
+  if (!game) {
+    throw new Error('Jogo não encontrado');
+  }
+
+  const currentPlayer = game.Players.find(player => player.GamePlayer.isCurrentTurn);
+
+  if (!currentPlayer) {
+    throw new Error('Nenhum jogador está definido como o atual');
+  }
+
+  return currentPlayer.username;
+}
+
+/**
+ * Obtém a carta do topo da pilha de descarte
+ * @param {number} gameId - ID do jogo
+ * @returns {Promise<string>} - Carta do topo
+ */
+async function getTopCard(gameId) {
+  const game = await Game.findByPk(gameId, {
+    include: [{
+      model: Card,
+      as: 'DiscardPile',
+      order: [['createdAt', 'DESC']]
+    }]
+  });
+
+  if (!game || !game.DiscardPile || game.DiscardPile.length === 0) {
+    throw new Error('Nenhuma carta encontrada na pilha de descarte');
+  }
+
+  return game.DiscardPile[0].name;
+}
+
+/**
+ * Obtém as pontuações atuais de todos os jogadores
+ * @param {number} gameId - ID do jogo
+ * @returns {Promise<Object>} - Pontuações dos jogadores
+ */
+async function getScores(gameId) {
+  const game = await Game.findByPk(gameId, {
+    include: [{
+      model: Player,
+      through: { attributes: ['score'] }
+    }]
+  });
+
+  if (!game) {
+    throw new Error('Jogo não encontrado');
+  }
+
+  const scores = {};
+  game.Players.forEach(player => {
+    scores[player.username] = player.GamePlayer.score;
+  });
+
+  return scores;
+}
+
+module.exports = {
+  GameService,
+  getCurrentPlayer,
+  getTopCard,
+  getScores
+};

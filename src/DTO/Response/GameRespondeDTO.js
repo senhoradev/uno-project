@@ -1,7 +1,7 @@
 class GameResponseDTO {
-    constructor({ id, title, status, maxPlayers, creatorId, createdAt, updatedAt, players }) {
+    constructor({ id, name, status, maxPlayers, creatorId, createdAt, updatedAt, players }) {
         this.id = id;
-        this.title = title;
+        this.name = name;
         this.status = status;
         this.maxPlayers = maxPlayers;
         this.creatorId = creatorId;
@@ -21,7 +21,7 @@ class GameResponseDTO {
     static fromModel(game) {
         return new GameResponseDTO({
             id: game.id,
-            title: game.title,
+            name: game.name,
             status: game.status,
             maxPlayers: game.maxPlayers,
             creatorId: game.creatorId,
@@ -33,6 +33,27 @@ class GameResponseDTO {
 
     static fromModelList(games) {
         return games.map(game => GameResponseDTO.fromModel(game));
+    }
+
+    static currentPlayerResponse(gameId, currentPlayer) {
+        return {
+            game_id: gameId,
+            current_player: currentPlayer
+        };
+    }
+
+    static topCardResponse(gameId, topCard) {
+        return {
+            game_id: gameId,
+            top_card: topCard
+        };
+    }
+
+    static scoresResponse(gameId, scores) {
+        return {
+            game_id: gameId,
+            scores
+        };
     }
 }
 

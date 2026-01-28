@@ -108,6 +108,53 @@ exports.getPlayers = async (req, res) => {
   }
 };
 
+/**
+ * Obtém o jogador atual que deve jogar uma carta
+ */
+exports.getCurrentPlayer = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const currentPlayer = await gameService.getCurrentPlayer(game_id);
+    return res.json({
+      game_id,
+      current_player: currentPlayer
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém a carta do topo da pilha de descarte
+ */
+exports.getTopCard = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const topCard = await gameService.getTopCard(game_id);
+    return res.json({
+      game_id,
+      top_card: topCard
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém as pontuações atuais de todos os jogadores
+ */
+exports.getScores = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const scores = await gameService.getScores(game_id);
+    return res.json({
+      game_id,
+      scores
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
 
 exports.getById = async (req, res) => {
   try {

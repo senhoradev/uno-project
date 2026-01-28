@@ -76,4 +76,31 @@ router.put('/:id', gameController.update);
  */
 router.delete('/:id', gameController.delete);
 
+/**
+ * @route POST /api/games/current-player
+ * @description Obter o jogador atual que deve jogar uma carta
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Jogador atual
+ */
+router.post('/current-player', auth, gameController.getCurrentPlayer);
+
+/**
+ * @route POST /api/games/top-card
+ * @description Pegar a carta do topo da pilha de descarte
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Carta do topo
+ */
+router.post('/top-card', auth, gameController.getTopCard);
+
+/**
+ * @route POST /api/games/scores
+ * @description Obter pontuações atuais de todos os jogadores
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Pontuações dos jogadores
+ */
+router.post('/scores', auth, gameController.getScores);
+
 module.exports = router;
