@@ -1,16 +1,21 @@
 const playerService = require('../services/playerService');
+require('../DTO/Response/PlayerResponseDTO')
+
 
 exports.register = async (req, res) => {
   try {
-    await playerService.createPlayer(req.body);
-    res.status(201).json({ message: 'Jogador registrado com sucesso' });
+    const userResponse = await playerService.createPlayer(req.body);
+
+    return res.status(201).json(userResponse);
+  } catch (error) {
+    if (error.message === 'User already exists') {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    return res.status(400).json({ error: error.message });
   }
-  catch (error) {
-    if (error.message === 'User already exists')
-      return res.status(400).json({ error: "user already exists" });
-  }
-  res.status(400).json({ error: error.message });
 };
+
 
 exports.login = async (req, res) => {
   try {

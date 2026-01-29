@@ -2,29 +2,28 @@ const Player = require('../models/player');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
-
+const playerRepository = require('../repository/PlayerRepository');
+const PlayerResponseDTO = require('../DTO/Response/PlayerResponseDTO');
 
 class PlayerService {
-  // Cria um novo player recebendo os dados do controller
-  async createPlayer(data) { 
-    const { username, email, password } = data;
+  async createPlayer(playerToSave) {
+    const { email, password, username } = playerToSave;
 
-    if (!password || password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres');
+    if (!password || password.length < 6) {
+      throw new Error('A senha deve ter pelo menos 6 caracteres');
+    }
 
-    const existingPlayer = await Player.findOne({ 
-      where: { [Op.or]: [{ username }, { email }] } 
-    });
-    if (existingPlayer) throw new Error('User already exists'); // Texto em inglês para o Controller capturar
+    if (await playerRepository.existsByEmail(email)) {
+      throw new Error('User already exists');
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    return await Player.create({ 
-      ...data, 
-      password: hashedPassword,
-      name: data.name || username,
-      age: data.age || 0
-    });
+    playerToSave.password = await bcrypt.hash(password, 10);
+
+    await playerRepository.save(playerToSave);
+
+    return new PlayerResponseDTO(username, email);
   }
+
 
   async login(username, password) {
     const player = await Player.findOne({ where: { username } });

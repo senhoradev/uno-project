@@ -5,7 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a00e9bd-bd77-4105-b245-53de4f8a4e35" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/Repository/PlayerRepository.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/ca748468-db4b-414a-ad38-3b11c2acc400.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/ca748468-db4b-414a-ad38-3b11c2acc400.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DTO/Response/PlayerResponseDTO.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/DTO/Response/PlayerResponseDTO.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/config/database.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/database.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/playerController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/playerController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/services/playerService.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/playerService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,7 +64,7 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "git-widget-placeholder": "feature/addGame",
+    "git-widget-placeholder": "safira",
     "javascript.preferred.runtime.type.id": "node",
     "last_opened_file_path": "C:/Users/pvito/Documents/Jala University/4º Semestre - 05 01 2026/1º Módulo/Programação 4/RSVDG",
     "node.js.detected.package.eslint": "true",

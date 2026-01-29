@@ -1189,7 +1189,7 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
     <column id="328" parent="300" name="id">
-      <AutoIncrement>1</AutoIncrement>
+      <AutoIncrement>7</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
@@ -1239,127 +1239,255 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="338" parent="300" name="username_2">
+    <index id="338" parent="300" name="username_10">
       <ColNames>username</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="339" parent="300" name="username_3">
+    <index id="339" parent="300" name="username_11">
       <ColNames>username</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="340" parent="300" name="email">
+    <index id="340" parent="300" name="username_2">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="341" parent="300" name="username_3">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="342" parent="300" name="username_4">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="343" parent="300" name="username_5">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="344" parent="300" name="username_6">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="345" parent="300" name="username_7">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="346" parent="300" name="username_8">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="347" parent="300" name="username_9">
+      <ColNames>username</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="348" parent="300" name="email">
       <ColNames>email</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="341" parent="300" name="email_2">
+    <index id="349" parent="300" name="email_10">
       <ColNames>email</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="342" parent="300" name="email_3">
+    <index id="350" parent="300" name="email_11">
       <ColNames>email</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="343" parent="300" name="PRIMARY">
+    <index id="351" parent="300" name="email_2">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="352" parent="300" name="email_3">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="353" parent="300" name="email_4">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="354" parent="300" name="email_5">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="355" parent="300" name="email_6">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="356" parent="300" name="email_7">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="357" parent="300" name="email_8">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <index id="358" parent="300" name="email_9">
+      <ColNames>email</ColNames>
+      <Type>btree</Type>
+      <Unique>1</Unique>
+    </index>
+    <key id="359" parent="300" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="344" parent="300" name="username">
+    <key id="360" parent="300" name="username">
       <UnderlyingIndexName>username</UnderlyingIndexName>
     </key>
-    <key id="345" parent="300" name="username_2">
+    <key id="361" parent="300" name="username_10">
+      <UnderlyingIndexName>username_10</UnderlyingIndexName>
+    </key>
+    <key id="362" parent="300" name="username_11">
+      <UnderlyingIndexName>username_11</UnderlyingIndexName>
+    </key>
+    <key id="363" parent="300" name="username_2">
       <UnderlyingIndexName>username_2</UnderlyingIndexName>
     </key>
-    <key id="346" parent="300" name="username_3">
+    <key id="364" parent="300" name="username_3">
       <UnderlyingIndexName>username_3</UnderlyingIndexName>
     </key>
-    <key id="347" parent="300" name="email">
+    <key id="365" parent="300" name="username_4">
+      <UnderlyingIndexName>username_4</UnderlyingIndexName>
+    </key>
+    <key id="366" parent="300" name="username_5">
+      <UnderlyingIndexName>username_5</UnderlyingIndexName>
+    </key>
+    <key id="367" parent="300" name="username_6">
+      <UnderlyingIndexName>username_6</UnderlyingIndexName>
+    </key>
+    <key id="368" parent="300" name="username_7">
+      <UnderlyingIndexName>username_7</UnderlyingIndexName>
+    </key>
+    <key id="369" parent="300" name="username_8">
+      <UnderlyingIndexName>username_8</UnderlyingIndexName>
+    </key>
+    <key id="370" parent="300" name="username_9">
+      <UnderlyingIndexName>username_9</UnderlyingIndexName>
+    </key>
+    <key id="371" parent="300" name="email">
       <UnderlyingIndexName>email</UnderlyingIndexName>
     </key>
-    <key id="348" parent="300" name="email_2">
+    <key id="372" parent="300" name="email_10">
+      <UnderlyingIndexName>email_10</UnderlyingIndexName>
+    </key>
+    <key id="373" parent="300" name="email_11">
+      <UnderlyingIndexName>email_11</UnderlyingIndexName>
+    </key>
+    <key id="374" parent="300" name="email_2">
       <UnderlyingIndexName>email_2</UnderlyingIndexName>
     </key>
-    <key id="349" parent="300" name="email_3">
+    <key id="375" parent="300" name="email_3">
       <UnderlyingIndexName>email_3</UnderlyingIndexName>
     </key>
-    <column id="350" parent="301" name="id">
+    <key id="376" parent="300" name="email_4">
+      <UnderlyingIndexName>email_4</UnderlyingIndexName>
+    </key>
+    <key id="377" parent="300" name="email_5">
+      <UnderlyingIndexName>email_5</UnderlyingIndexName>
+    </key>
+    <key id="378" parent="300" name="email_6">
+      <UnderlyingIndexName>email_6</UnderlyingIndexName>
+    </key>
+    <key id="379" parent="300" name="email_7">
+      <UnderlyingIndexName>email_7</UnderlyingIndexName>
+    </key>
+    <key id="380" parent="300" name="email_8">
+      <UnderlyingIndexName>email_8</UnderlyingIndexName>
+    </key>
+    <key id="381" parent="300" name="email_9">
+      <UnderlyingIndexName>email_9</UnderlyingIndexName>
+    </key>
+    <column id="382" parent="301" name="id">
       <AutoIncrement>2</AutoIncrement>
       <NotNull>1</NotNull>
       <Position>1</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="351" parent="301" name="playerId">
+    <column id="383" parent="301" name="playerId">
       <NotNull>1</NotNull>
       <Position>2</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="352" parent="301" name="gameId">
+    <column id="384" parent="301" name="gameId">
       <NotNull>1</NotNull>
       <Position>3</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="353" parent="301" name="score">
+    <column id="385" parent="301" name="score">
       <NotNull>1</NotNull>
       <Position>4</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="354" parent="301" name="scoreId">
+    <column id="386" parent="301" name="scoreId">
       <NotNull>1</NotNull>
       <Position>5</Position>
       <StoredType>int|0s</StoredType>
     </column>
-    <column id="355" parent="301" name="date">
+    <column id="387" parent="301" name="date">
       <NotNull>1</NotNull>
       <Position>6</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="356" parent="301" name="createdAt">
+    <column id="388" parent="301" name="createdAt">
       <NotNull>1</NotNull>
       <Position>7</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <column id="357" parent="301" name="updatedAt">
+    <column id="389" parent="301" name="updatedAt">
       <NotNull>1</NotNull>
       <Position>8</Position>
       <StoredType>datetime|0s</StoredType>
     </column>
-    <index id="358" parent="301" name="PRIMARY">
+    <index id="390" parent="301" name="PRIMARY">
       <ColNames>id</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="359" parent="301" name="scoreId">
+    <index id="391" parent="301" name="scoreId">
       <ColNames>scoreId</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="360" parent="301" name="scoreId_2">
+    <index id="392" parent="301" name="scoreId_2">
       <ColNames>scoreId</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <index id="361" parent="301" name="scoreId_3">
+    <index id="393" parent="301" name="scoreId_3">
       <ColNames>scoreId</ColNames>
       <Type>btree</Type>
       <Unique>1</Unique>
     </index>
-    <key id="362" parent="301" name="PRIMARY">
+    <key id="394" parent="301" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <Primary>1</Primary>
       <UnderlyingIndexName>PRIMARY</UnderlyingIndexName>
     </key>
-    <key id="363" parent="301" name="scoreId">
+    <key id="395" parent="301" name="scoreId">
       <UnderlyingIndexName>scoreId</UnderlyingIndexName>
     </key>
-    <key id="364" parent="301" name="scoreId_2">
+    <key id="396" parent="301" name="scoreId_2">
       <UnderlyingIndexName>scoreId_2</UnderlyingIndexName>
     </key>
-    <key id="365" parent="301" name="scoreId_3">
+    <key id="397" parent="301" name="scoreId_3">
       <UnderlyingIndexName>scoreId_3</UnderlyingIndexName>
     </key>
   </database-model>
