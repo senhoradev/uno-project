@@ -27,7 +27,7 @@ class PlayerService {
 
   async login(username, password) {
     const player = await Player.findOne({ where: { username } });
-    
+
     if (!player || !(await bcrypt.compare(password, player.password))) {
       throw new Error('Invalid credentials'); // Consistente com o Requisito 2
     }
@@ -61,32 +61,40 @@ class PlayerService {
 
   // Busca um jogador pelo ID
   async getPlayerById(id) {
-    const player = await Player.findByPk(id);
+
+    const player = await playerRepository.findById(id);
     if (!player) throw new Error('Jogador não encontrado');
-    return player;
+
+    return new PlayerResponseDTO(player.username, player.email);
   }
+
+
 
   // Atualiza os dados de um jogador existente
   async updatePlayer(id, data) {
     // Reutiliza o método getPlayerById para garantir que o jogador existe antes de atualizar
-    const player = await this.getPlayerById(id);
-
+    const player = await playerRepository.findById(id)
+    if(!player) throw new Error('User not found');
     // Se a senha estiver sendo atualizada, realiza a validação e o hash
     if (data.password) {
       if (data.password.length < 6) throw new Error('A senha deve ter pelo menos 6 caracteres');
       data.password = await bcrypt.hash(data.password, 10);
     }
-
-    return await player.update(data);
+    await playerRepository.update(id, data);
+    return new PlayerResponseDTO(data.username, data.email)
   }
 
-  // Remove um jogador do banco de dados
   async deletePlayer(id) {
-    // Busca o jogador para garantir que ele existe antes da exclusão
-    const player = await this.getPlayerById(id);
-    await player.destroy();
+    const player = await playerRepository.findById(id);
+
+    if (!player) {
+      throw new Error('Jogador não encontrado');
+    }
+
+    await playerRepository.deleteById(id);
     return { message: 'Jogador removido com sucesso' };
   }
+
 }
 
 // Exporta uma instância única do serviço para ser usada
