@@ -367,9 +367,8 @@ async function getScores(gameId) {
   return scores;
 }
 
-module.exports = {
-  GameService,
+ module.exports =  new GameService({
   getCurrentPlayer,
   getTopCard,
   getScores
-};
+}); 
