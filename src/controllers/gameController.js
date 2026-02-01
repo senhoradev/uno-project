@@ -9,7 +9,6 @@ const gameService = require('../services/gameService');
 exports.create = async (req, res) => {
   try {
     const game = await gameService.createGame(req.body, req.user.id);
-    // Retorno manual conforme seu requisito nº 5
     return res.status(201).json({ 
       message: "Game created successfully", 
       game_id: game.id 
