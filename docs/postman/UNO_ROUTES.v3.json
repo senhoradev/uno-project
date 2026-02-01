@@ -252,7 +252,6 @@
           },
           "response": []
         },
-        
         {
           "name": "delete",
           "request": {
@@ -318,6 +317,93 @@
               "host": ["{{url}}{{games}}/start"]
             },
             "description": "Inicia o jogo. Apenas o criador pode iniciar e todos devem estar prontos."
+          },
+          "response": []
+        },
+        {
+          "name": "getCurrentPlayer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/current-player",
+              "host": [
+                "{{url}}{{games}}/current-player"
+              ]
+            },
+            "description": "Obtém o jogador atual que deve realizar a jogada."
+          },
+          "response": []
+        },
+        {
+          "name": "getTopCard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/top-card",
+              "host": [
+                "{{url}}{{games}}/top-card"
+              ]
+            },
+            "description": "Retorna a carta que está no topo da pilha de descarte."
+          },
+          "response": []
+        },
+        {
+          "name": "getScores",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/scores",
+              "host": [
+                "{{url}}{{games}}/scores"
+              ]
+            },
+            "description": "Obtém as pontuações atuais de todos os participantes do jogo."
           },
           "response": []
         },
@@ -602,7 +688,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"color\": \"red\",\n  \"value\": \"7\",\n  \"type\": \"number\"\n}",
+              "raw": "{\n  \"color\": \"red\",\n  \"action\": \"draw_two\",\n  \"value\": \"7\",\n  \"type\": \"number\",\n  \"gameId\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -629,7 +715,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"color\": \"blue\",\n  \"value\": \"skip\",\n  \"type\": \"skip\"\n}",
+              "raw": "{\n  \"color\": \"blue\",\n  \"action\": \"skip\",\n  \"value\": \"skip\",\n  \"type\": \"skip\",\n  \"gameId\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
