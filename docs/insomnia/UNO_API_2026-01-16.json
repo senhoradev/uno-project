@@ -1,305 +1,1509 @@
 {
   "_type": "export",
   "__export_format": 4,
-  "__export_date": "2026-01-16T12:00:00.000Z",
+  "__export_date": "2026-02-02T00:00:00.000Z",
   "__export_source": "insomnia.desktop.app:v2023.5.8",
   "resources": [
     {
-      "_id": "wrk_rsvdg",
+      "_id": "wrk_uno_api",
       "parentId": null,
-      "modified": 1705403200000,
-      "created": 1705403200000,
+      "modified": 1706832000000,
+      "created": 1706832000000,
       "name": "RSVDG - UNO API",
       "description": "Collection completa da API do projeto UNO",
       "scope": "collection",
       "_type": "workspace"
     },
     {
-      "_id": "fld_games",
-      "parentId": "wrk_rsvdg",
-      "modified": 1705403200000,
-      "created": 1705403200000,
-      "name": "Games",
-      "description": "CRUD de Jogos",
+      "_id": "env_base",
+      "parentId": "wrk_uno_api",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "name": "Base Environment",
+      "data": {
+        "url": "http://localhost:3000",
+        "players": "/api/players",
+        "games": "/api/games",
+        "cards": "/api/cards",
+        "score": "/api/scoring-history",
+        "signup": "/api/signup",
+        "login": "/api/auth/login",
+        "logout": "/api/auth/logout",
+        "profile": "/api/auth/profile",
+        "joingame": "/api/games/join",
+        "token": ""
+      },
+      "dataPropertyOrder": {
+        "&": ["url", "players", "games", "cards", "score", "signup", "login", "logout", "profile", "joingame", "token"]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1706832000000,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_uno_api",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "name": "Auth",
+      "description": "",
       "environment": {},
-      "metaSortKey": -1000,
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706832000000,
       "_type": "request_group"
     },
     {
-      "_id": "req_create_game",
-      "parentId": "fld_games",
-      "url": "http://localhost:3000/api/games",
-      "name": "Create Game",
+      "_id": "req_signup",
+      "parentId": "fld_auth",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.signup }}",
+      "name": "SignUp",
+      "description": "Registra um novo usuário no sistema",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"title\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}"
+        "text": "{\n  \"username\": \"safira\",\n  \"email\": \"safira@email.com\",\n  \"password\": \"121418\",\n  \"name\": \"Safira\",\n  \"age\": 22\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1706832000001,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_get_game",
+      "_id": "req_login",
+      "parentId": "fld_auth",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.login }}",
+      "name": "Login",
+      "description": "Autentica o usuário e retorna um token JWT. O token é salvo automaticamente na variável 'token'.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"safira\",\n  \"password\": \"121418\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1706832000002,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_logout",
+      "parentId": "fld_auth",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.logout }}",
+      "name": "Logout",
+      "description": "Encerra a sessão do usuário",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000003,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_profile",
+      "parentId": "fld_auth",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.profile }}",
+      "name": "Profile",
+      "description": "Retorna os dados do usuário autenticado",
+      "method": "POST",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000004,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_games",
+      "parentId": "wrk_uno_api",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "name": "/api/games",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706831999000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_games_getall",
       "parentId": "fld_games",
-      "url": "http://localhost:3000/api/games/1",
-      "name": "Get Game by ID",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}",
+      "name": "getAll",
+      "description": "Lista todos os jogos",
       "method": "GET",
       "body": {},
+      "parameters": [],
       "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000001,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_update_game",
+      "_id": "req_games_getbyid",
       "parentId": "fld_games",
-      "url": "http://localhost:3000/api/games/1",
-      "name": "Update Game",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/1",
+      "name": "getById",
+      "description": "Busca um jogo pelo ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000002,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_post",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}",
+      "name": "post",
+      "description": "Cria um novo jogo. O criador entra automaticamente.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Partida UNO #1\",\n  \"maxPlayers\": 4\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000003,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_put",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/1",
+      "name": "put",
+      "description": "Atualiza um jogo existente. Status válidos: waiting, in_progress, finished, cancelled",
       "method": "PUT",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"title\": \"UNO Atualizado\",\n  \"status\": \"finished\",\n  \"maxPlayers\": 6\n}"
+        "text": "{\n  \"name\": \"Partida UNO Atualizada\",\n  \"status\": \"in_progress\",\n  \"maxPlayers\": 6\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000004,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_delete_game",
+      "_id": "req_games_delete",
       "parentId": "fld_games",
-      "url": "http://localhost:3000/api/games/1",
-      "name": "Delete Game",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/1",
+      "name": "delete",
+      "description": "Remove um jogo pelo ID",
       "method": "DELETE",
       "body": {},
+      "parameters": [],
       "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000005,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_join",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.joingame }}",
+      "name": "joinGame",
+      "description": "Entra em um jogo existente",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000006,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_start",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/start",
+      "name": "startGame",
+      "description": "Inicia o jogo. Apenas o criador pode iniciar e todos devem estar prontos.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000007,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_currentplayer",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/current-player",
+      "name": "getCurrentPlayer",
+      "description": "Obtém o jogador atual que deve realizar a jogada.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000008,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_topcard",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/top-card",
+      "name": "getTopCard",
+      "description": "Retorna a carta que está no topo da pilha de descarte.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000009,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_scores",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/scores",
+      "name": "getScores",
+      "description": "Obtém as pontuações atuais de todos os participantes do jogo.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000010,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_leave",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/leave",
+      "name": "leaveGame",
+      "description": "Abandona um jogo em progresso. Verifica se o jogo está em andamento e se o usuário é um jogador.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000011,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_end",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/end",
+      "name": "endGame",
+      "description": "Finaliza um jogo. Apenas o criador pode encerrar e o jogo deve estar em andamento.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000012,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_state",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/state",
+      "name": "getGameState",
+      "description": "Obtém o estado atual do jogo (waiting, in_progress, finished, cancelled).",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000013,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_players",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/players",
+      "name": "getGamePlayers",
+      "description": "Obtém a lista de jogadores no jogo.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000014,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_games_ready",
+      "parentId": "fld_games",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/ready",
+      "name": "toggleReady",
+      "description": "Alterna o status de pronto do jogador. Se estava pronto, fica não pronto e vice-versa.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"game_id\": 1\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000015,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
       "_id": "fld_players",
-      "parentId": "wrk_rsvdg",
-      "modified": 1705403200000,
-      "created": 1705403200000,
-      "name": "Players",
-      "description": "CRUD de Jogadores",
+      "parentId": "wrk_uno_api",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "name": "/api/players",
+      "description": "",
       "environment": {},
-      "metaSortKey": -900,
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706831998000,
       "_type": "request_group"
     },
     {
-      "_id": "req_create_player",
+      "_id": "req_players_getall",
       "parentId": "fld_players",
-      "url": "http://localhost:3000/api/players",
-      "name": "Create Player",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.players }}",
+      "name": "getAll",
+      "description": "Lista todos os jogadores",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000001,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_players_getbyid",
+      "parentId": "fld_players",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.players }}/1",
+      "name": "getById",
+      "description": "Busca um jogador pelo ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000002,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_players_post",
+      "parentId": "fld_players",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.players }}",
+      "name": "post",
+      "description": "Cria um novo jogador",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"name\": \"Grazi\",\n  \"age\": 25,\n  \"email\": \"grazi@email.com\"\n}"
+        "text": "{\n  \"username\": \"grazi_player\",\n  \"email\": \"grazi@email.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Grazi\",\n  \"age\": 25\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000003,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_get_player",
+      "_id": "req_players_put",
       "parentId": "fld_players",
-      "url": "http://localhost:3000/api/players/1",
-      "name": "Get Player by ID",
-      "method": "GET",
-      "body": {},
-      "headers": [],
-      "_type": "request"
-    },
-    {
-      "_id": "req_update_player",
-      "parentId": "fld_players",
-      "url": "http://localhost:3000/api/players/1",
-      "name": "Update Player",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.players }}/1",
+      "name": "put",
+      "description": "Atualiza um jogador existente",
       "method": "PUT",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"name\": \"Grazi Atualizado\",\n  \"age\": 26,\n  \"email\": \"grazi.novo@email.com\"\n}"
+        "text": "{\n  \"username\": \"grazi_updated\",\n  \"email\": \"grazi.novo@email.com\",\n  \"name\": \"Grazi Atualizada\",\n  \"age\": 26\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000004,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_delete_player",
+      "_id": "req_players_delete",
       "parentId": "fld_players",
-      "url": "http://localhost:3000/api/players/1",
-      "name": "Delete Player",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.players }}/1",
+      "name": "delete",
+      "description": "Remove um jogador pelo ID",
       "method": "DELETE",
       "body": {},
+      "parameters": [],
       "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000005,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
       "_id": "fld_cards",
-      "parentId": "wrk_rsvdg",
-      "modified": 1705403200000,
-      "created": 1705403200000,
-      "name": "Cards",
-      "description": "CRUD de Cartas",
+      "parentId": "wrk_uno_api",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "name": "/api/cards",
+      "description": "",
       "environment": {},
-      "metaSortKey": -800,
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706831997000,
       "_type": "request_group"
     },
     {
-      "_id": "req_create_card",
+      "_id": "req_cards_getall",
       "parentId": "fld_cards",
-      "url": "http://localhost:3000/api/cards",
-      "name": "Create Card",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.cards }}",
+      "name": "getAll",
+      "description": "Lista todas as cartas",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000001,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_cards_getbyid",
+      "parentId": "fld_cards",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.cards }}/1",
+      "name": "getById",
+      "description": "Busca uma carta pelo ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000002,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_cards_post",
+      "parentId": "fld_cards",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.cards }}",
+      "name": "post",
+      "description": "Cria uma nova carta. Cores: red, blue, green, yellow, wild. Tipos: number, skip, reverse, draw_two, wild, wild_draw_four",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"color\": \"red\",\n  \"action\": \"7\",\n  \"gameId\": 1\n}"
+        "text": "{\n  \"color\": \"red\",\n  \"action\": \"draw_two\",\n  \"value\": \"7\",\n  \"type\": \"number\",\n  \"gameId\": 1\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000003,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_get_card",
+      "_id": "req_cards_put",
       "parentId": "fld_cards",
-      "url": "http://localhost:3000/api/cards/1",
-      "name": "Get Card by ID",
-      "method": "GET",
-      "body": {},
-      "headers": [],
-      "_type": "request"
-    },
-    {
-      "_id": "req_update_card",
-      "parentId": "fld_cards",
-      "url": "http://localhost:3000/api/cards/1",
-      "name": "Update Card",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.cards }}/1",
+      "name": "put",
+      "description": "Atualiza uma carta existente",
       "method": "PUT",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"color\": \"blue\",\n  \"action\": \"skip\",\n  \"gameId\": 1\n}"
+        "text": "{\n  \"color\": \"blue\",\n  \"action\": \"skip\",\n  \"value\": \"skip\",\n  \"type\": \"skip\",\n  \"gameId\": 1\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000004,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_delete_card",
+      "_id": "req_cards_delete",
       "parentId": "fld_cards",
-      "url": "http://localhost:3000/api/cards/1",
-      "name": "Delete Card",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.cards }}/1",
+      "name": "delete",
+      "description": "Remove uma carta pelo ID",
       "method": "DELETE",
       "body": {},
+      "parameters": [],
       "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000005,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "fld_scoring",
-      "parentId": "wrk_rsvdg",
-      "modified": 1705403200000,
-      "created": 1705403200000,
-      "name": "Scoring History",
-      "description": "CRUD de Histórico de Pontuação",
+      "_id": "fld_score",
+      "parentId": "wrk_uno_api",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "name": "/api/scoring-history",
+      "description": "",
       "environment": {},
-      "metaSortKey": -700,
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706831996000,
       "_type": "request_group"
     },
     {
-      "_id": "req_create_scoring",
-      "parentId": "fld_scoring",
-      "url": "http://localhost:3000/api/scoring-history",
-      "name": "Create Scoring",
+      "_id": "req_score_getall",
+      "parentId": "fld_score",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.score }}",
+      "name": "getAll",
+      "description": "Lista todo o histórico de pontuações",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000001,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_score_getbyid",
+      "parentId": "fld_score",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.score }}/1",
+      "name": "getById",
+      "description": "Busca uma pontuação pelo ID",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000002,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_score_getbyplayerid",
+      "parentId": "fld_score",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.score }}/player/1",
+      "name": "getByPlayerId",
+      "description": "Busca pontuações de um jogador específico",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000003,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_score_getbygameid",
+      "parentId": "fld_score",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.score }}/game/1",
+      "name": "getByGameId",
+      "description": "Busca pontuações de um jogo específico",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000004,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_score_post",
+      "parentId": "fld_score",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.score }}",
+      "name": "post",
+      "description": "Registra uma nova pontuação",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"playerId\": 1,\n  \"gameId\": 1,\n  \"score\": 100\n}"
+        "text": "{\n  \"playerId\": 1,\n  \"gameId\": 1,\n  \"score\": 100,\n  \"position\": 1,\n  \"isWinner\": true\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000005,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_get_scoring",
-      "parentId": "fld_scoring",
-      "url": "http://localhost:3000/api/scoring-history/1",
-      "name": "Get Scoring by ID",
-      "method": "GET",
-      "body": {},
-      "headers": [],
-      "_type": "request"
-    },
-    {
-      "_id": "req_update_scoring",
-      "parentId": "fld_scoring",
-      "url": "http://localhost:3000/api/scoring-history/1",
-      "name": "Update Scoring",
+      "_id": "req_score_put",
+      "parentId": "fld_score",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.score }}/1",
+      "name": "put",
+      "description": "Atualiza uma pontuação existente",
       "method": "PUT",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"score\": 150\n}"
+        "text": "{\n  \"score\": 150,\n  \"position\": 2,\n  \"isWinner\": false\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000006,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_delete_scoring",
-      "parentId": "fld_scoring",
-      "url": "http://localhost:3000/api/scoring-history/1",
-      "name": "Delete Scoring",
+      "_id": "req_score_delete",
+      "parentId": "fld_score",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.score }}/1",
+      "name": "delete",
+      "description": "Remove uma pontuação pelo ID",
       "method": "DELETE",
       "body": {},
+      "parameters": [],
       "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000007,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
       "_id": "fld_validation",
-      "parentId": "wrk_rsvdg",
-      "modified": 1705403200000,
-      "created": 1705403200000,
-      "name": "Testes de Validação",
-      "description": "Testes de erro e validação",
+      "parentId": "wrk_uno_api",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "name": "Testes de Validacao",
+      "description": "",
       "environment": {},
-      "metaSortKey": -600,
+      "environmentPropertyOrder": null,
+      "metaSortKey": -1706831995000,
       "_type": "request_group"
     },
     {
-      "_id": "req_error_empty_title",
+      "_id": "req_val_game_empty_title",
       "parentId": "fld_validation",
-      "url": "http://localhost:3000/api/games",
-      "name": "Game - Título Vazio",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}",
+      "name": "Game - Titulo Vazio",
+      "description": "Deve retornar erro 400 - título obrigatório",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"title\": \"\",\n  \"status\": \"active\",\n  \"maxPlayers\": 4\n}"
+        "text": "{\n  \"name\": \"\",\n  \"maxPlayers\": 4\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000001,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_error_invalid_status",
+      "_id": "req_val_game_invalid_status",
       "parentId": "fld_validation",
-      "url": "http://localhost:3000/api/games",
-      "name": "Game - Status Inválido",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/1",
+      "name": "Game - Status Invalido",
+      "description": "Deve retornar erro 400 - status inválido",
+      "method": "PUT",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"UNO\",\n  \"status\": \"invalid_status\",\n  \"maxPlayers\": 4\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000002,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_val_game_max_players_high",
+      "parentId": "fld_validation",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}",
+      "name": "Game - MaxPlayers maior que 10",
+      "description": "Deve retornar erro 400 - maxPlayers deve ser entre 2 e 10",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"title\": \"UNO\",\n  \"status\": \"invalid\",\n  \"maxPlayers\": 4\n}"
+        "text": "{\n  \"name\": \"UNO\",\n  \"maxPlayers\": 15\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000003,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_error_max_players",
+      "_id": "req_val_game_max_players_low",
       "parentId": "fld_validation",
-      "url": "http://localhost:3000/api/games",
-      "name": "Game - MaxPlayers > 10",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}",
+      "name": "Game - MaxPlayers menor que 2",
+      "description": "Deve retornar erro 400 - maxPlayers deve ser entre 2 e 10",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"title\": \"UNO\",\n  \"status\": \"active\",\n  \"maxPlayers\": 15\n}"
+        "text": "{\n  \"name\": \"UNO\",\n  \"maxPlayers\": 1\n}"
       },
-      "headers": [{"name": "Content-Type", "value": "application/json"}],
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000004,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     },
     {
-      "_id": "req_error_not_found",
+      "_id": "req_val_game_not_found",
       "parentId": "fld_validation",
-      "url": "http://localhost:3000/api/games/9999",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.games }}/9999",
       "name": "Game - Not Found",
+      "description": "Deve retornar erro 404 - jogo não encontrado",
       "method": "GET",
       "body": {},
+      "parameters": [],
       "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000005,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_val_player_invalid_email",
+      "parentId": "fld_validation",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.players }}",
+      "name": "Player - Email Invalido",
+      "description": "Deve retornar erro 400 - email inválido",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"test_user\",\n  \"email\": \"email-invalido\",\n  \"password\": \"senha123\",\n  \"name\": \"Teste\",\n  \"age\": 20\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000006,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_val_player_empty_username",
+      "parentId": "fld_validation",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.players }}",
+      "name": "Player - Username Vazio",
+      "description": "Deve retornar erro 400 - username obrigatório",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"\",\n  \"email\": \"teste@email.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Teste\",\n  \"age\": 20\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000007,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_val_card_invalid_color",
+      "parentId": "fld_validation",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.cards }}",
+      "name": "Card - Cor Invalida",
+      "description": "Deve retornar erro 400 - cor inválida (válidas: red, blue, green, yellow, wild)",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"color\": \"purple\",\n  \"value\": \"5\",\n  \"type\": \"number\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token }}"
+      },
+      "metaSortKey": -1706832000008,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_val_login_invalid_creds",
+      "parentId": "fld_validation",
+      "modified": 1706832000000,
+      "created": 1706832000000,
+      "url": "{{ _.url }}{{ _.login }}",
+      "name": "Login - Credenciais Invalidas",
+      "description": "Deve retornar erro 401 - credenciais inválidas",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"username\": \"usuario_inexistente\",\n  \"password\": \"senha_errada\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": -1706832000009,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
       "_type": "request"
     }
   ]
