@@ -249,7 +249,12 @@ class GameService {
       throw new Error('Nem todos os jogadores estão prontos');
     }
 
-    // 4. Atualiza o status do jogo para iniciado
+    // 4. Define o primeiro jogador como o jogador atual
+    if (players.length > 0) {
+      await players[0].update({ isCurrentTurn: true });
+    }
+
+    // 5. Atualiza o status do jogo para iniciado
     await game.update({ status: 'started' });
     
     return true;
@@ -300,46 +305,57 @@ class GameService {
  * @returns {Promise<string>} - Nome do jogador atual
  */
 async function getCurrentPlayer(gameId) {
-  const game = await Game.findByPk(gameId, {
-    include: [{
-      model: Player,
-      through: { attributes: ['turnOrder'] },
-      order: [[{ model: Player, as: 'Players' }, 'turnOrder', 'ASC']]
-    }]
-  });
+  const game = await Game.findByPk(gameId);
 
   if (!game) {
     throw new Error('Jogo não encontrado');
   }
 
-  const currentPlayer = game.Players.find(player => player.GamePlayer.isCurrentTurn);
+  const gamePlayer = await GamePlayer.findOne({
+    where: { 
+      gameId,
+      isCurrentTurn: true 
+    },
+    include: [{
+      model: Player,
+      attributes: ['username']
+    }]
+  });
 
-  if (!currentPlayer) {
+  if (!gamePlayer || !gamePlayer.Player) {
     throw new Error('Nenhum jogador está definido como o atual');
   }
 
-  return currentPlayer.username;
+  return gamePlayer.Player.username;
 }
 
 /**
  * Obtém a carta do topo da pilha de descarte
  * @param {number} gameId - ID do jogo
- * @returns {Promise<string>} - Carta do topo
+ * @returns {Promise<Object>} - Carta do topo
  */
 async function getTopCard(gameId) {
-  const game = await Game.findByPk(gameId, {
-    include: [{
-      model: Card,
-      as: 'DiscardPile',
-      order: [['createdAt', 'DESC']]
-    }]
+  const game = await Game.findByPk(gameId);
+
+  if (!game) {
+    throw new Error('Jogo não encontrado');
+  }
+
+  const Card = require('../models/card');
+  const topCard = await Card.findOne({
+    where: { gameId },
+    order: [['createdAt', 'DESC']]
   });
 
-  if (!game || !game.DiscardPile || game.DiscardPile.length === 0) {
+  if (!topCard) {
     throw new Error('Nenhuma carta encontrada na pilha de descarte');
   }
 
-  return game.DiscardPile[0].name;
+  return {
+    color: topCard.color,
+    action: topCard.action,
+    id: topCard.id
+  };
 }
 
 /**
@@ -348,20 +364,25 @@ async function getTopCard(gameId) {
  * @returns {Promise<Object>} - Pontuações dos jogadores
  */
 async function getScores(gameId) {
-  const game = await Game.findByPk(gameId, {
-    include: [{
-      model: Player,
-      through: { attributes: ['score'] }
-    }]
-  });
+  const game = await Game.findByPk(gameId);
 
   if (!game) {
     throw new Error('Jogo não encontrado');
   }
 
+  const gamePlayers = await GamePlayer.findAll({
+    where: { gameId },
+    include: [{
+      model: Player,
+      attributes: ['username']
+    }]
+  });
+
   const scores = {};
-  game.Players.forEach(player => {
-    scores[player.username] = player.GamePlayer.score;
+  gamePlayers.forEach(gp => {
+    if (gp.Player) {
+      scores[gp.Player.username] = gp.score || 0;
+    }
   });
 
   return scores;

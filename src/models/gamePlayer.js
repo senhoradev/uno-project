@@ -24,6 +24,14 @@ const GamePlayer = sequelize.define('GamePlayer', {
     validate: {
       isIn: { args: [[true, false]], msg: "O campo isReady deve ser booleano." }
     }
+  },
+  isCurrentTurn: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
+  },
+  score: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
   }
 });
 
