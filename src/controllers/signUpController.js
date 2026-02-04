@@ -4,7 +4,7 @@
  */
 
 const signUpService = require('../services/signUpService');
-const CreatePlayerRequestDTO = require('../DTO/Request/CreatePlayerRequestDTO');
+const CreatePlayerRequestDTO = require('../DTO/Request/Player/CreatePlayerRequestDTO');
 
 /**
  * Registra um novo usuário no sistema.
