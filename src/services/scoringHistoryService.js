@@ -197,6 +197,64 @@ class ScoringHistoryService {
       });
     }
   }
+
+  /**
+   * Busca scores por gameId
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<Result>} Result com array de scores ou erro
+   */
+  async getScoresByGameId(gameId) {
+    try {
+      const scores = await scoringHistory.findAll({
+        where: { gameId },
+        order: [['score', 'DESC']]
+      });
+      
+      return Result.success(scores).map(scoreList => 
+        scoreList.map(s => ({
+          id: s.id,
+          score: s.score,
+          playerId: s.playerId,
+          gameId: s.gameId,
+          createdAt: s.createdAt
+        }))
+      );
+    } catch (error) {
+      return Result.failure({
+        message: 'Erro ao buscar pontuações do jogo',
+        code: 'DATABASE_ERROR'
+      });
+    }
+  }
+
+  /**
+   * Busca scores por playerId
+   * @param {number} playerId - ID do jogador
+   * @returns {Promise<Result>} Result com array de scores ou erro
+   */
+  async getScoresByPlayerId(playerId) {
+    try {
+      const scores = await scoringHistory.findAll({
+        where: { playerId },
+        order: [['createdAt', 'DESC']]
+      });
+      
+      return Result.success(scores).map(scoreList => 
+        scoreList.map(s => ({
+          id: s.id,
+          score: s.score,
+          playerId: s.playerId,
+          gameId: s.gameId,
+          createdAt: s.createdAt
+        }))
+      );
+    } catch (error) {
+      return Result.failure({
+        message: 'Erro ao buscar pontuações do jogador',
+        code: 'DATABASE_ERROR'
+      });
+    }
+  }
 }
  
 // Exporta uma instância única do serviço para ser usada

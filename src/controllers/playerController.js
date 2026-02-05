@@ -70,3 +70,12 @@ exports.delete = async (req, res) => {
     res.status(404).json({ error: error.message });
   }
 };
+
+exports.getAll = async (req, res) => {
+  try {
+    const players = await playerService.getAllPlayers();
+    res.json(players);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};

@@ -18,12 +18,15 @@ exports.create = async (req, res) => {
     // onSuccess: retorna 201 Created
     (score) => res.status(201).json(score),
     // onFailure: retorna 400 Bad Request
-    (error) => res.status(400).json({ 
-      error: error.message,
-      code: error.code,
-      field: error.field,
-      details: error.details
-    })
+    (error) => {
+      const response = { 
+        error: error.message,
+        code: error.code
+      };
+      if (error.field) response.field = error.field;
+      if (error.details) response.details = error.details;
+      res.status(400).json(response);
+    }
   );
 };
 
@@ -40,11 +43,50 @@ exports.getById = async (req, res) => {
     // onFailure: 404 se não encontrado, 500 para outros erros
     (error) => {
       const status = error.code === 'NOT_FOUND' ? 404 : 500;
-      res.status(status).json({ 
+      const response = { 
         error: error.message,
-        code: error.code,
-        details: error.details
-      });
+        code: error.code
+      };
+      if (error.details) response.details = error.details;
+      res.status(status).json(response);
+    }
+  );
+};
+
+/**
+ * Busca scores por gameId
+ */
+exports.getByGameId = async (req, res) => {
+  const result = await scoringHistoryService.getScoresByGameId(req.params.gameId);
+  
+  result.fold(
+    (scores) => res.json(scores),
+    (error) => {
+      const response = { 
+        error: error.message,
+        code: error.code
+      };
+      if (error.details) response.details = error.details;
+      res.status(500).json(response);
+    }
+  );
+};
+
+/**
+ * Busca scores por playerId
+ */
+exports.getByPlayerId = async (req, res) => {
+  const result = await scoringHistoryService.getScoresByPlayerId(req.params.playerId);
+  
+  result.fold(
+    (scores) => res.json(scores),
+    (error) => {
+      const response = { 
+        error: error.message,
+        code: error.code
+      };
+      if (error.details) response.details = error.details;
+      res.status(500).json(response);
     }
   );
 };
@@ -67,12 +109,13 @@ exports.update = async (req, res) => {
         'DATABASE_ERROR': 500
       };
       const status = statusMap[error.code] || 500;
-      res.status(status).json({ 
+      const response = { 
         error: error.message,
-        code: error.code,
-        field: error.field,
-        details: error.details
-      });
+        code: error.code
+      };
+      if (error.field) response.field = error.field;
+      if (error.details) response.details = error.details;
+      res.status(status).json(response);
     }
   );
 };
@@ -89,11 +132,12 @@ exports.delete = async (req, res) => {
     // onFailure: 404 se não encontrado, 500 para outros erros
     (error) => {
       const status = error.code === 'NOT_FOUND' ? 404 : 500;
-      res.status(status).json({ 
+      const response = { 
         error: error.message,
-        code: error.code,
-        details: error.details
-      });
+        code: error.code
+      };
+      if (error.details) response.details = error.details;
+      res.status(status).json(response);
     }
   );
 };
@@ -106,10 +150,13 @@ exports.getAll = async (req, res) => {
   
   result.fold(
     (scores) => res.json(scores),
-    (error) => res.status(500).json({ 
-      error: error.message,
-      code: error.code,
-      details: error.details
-    })
+    (error) => {
+      const response = { 
+        error: error.message,
+        code: error.code
+      };
+      if (error.details) response.details = error.details;
+      res.status(500).json(response);
+    }
   );
 };
