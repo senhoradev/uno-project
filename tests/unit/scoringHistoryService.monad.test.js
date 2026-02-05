@@ -6,16 +6,11 @@
 const scoringHistoryService = require('../../src/services/scoringHistoryService');
 const scoringHistory = require('../../src/models/scoringHistory');
 const Result = require('../../src/utils/Result');
-const { setupModels } = require('../helpers/setupModels');
 
 // Mock do modelo
 jest.mock('../../src/models/scoringHistory');
 
 describe('ScoringHistoryService com Result Monad', () => {
-  beforeAll(async () => {
-    await setupModels();
-  });
-
   beforeEach(() => {
     jest.clearAllMocks();
   });

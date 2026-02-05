@@ -26,9 +26,14 @@ describe('Result Monad', () => {
     test('Result é imutável', () => {
       const result = Result.success(10);
       
-      expect(() => {
-        result.value = 20;
-      }).toThrow();
+      // Tenta modificar propriedade (deve falhar silenciosamente em strict mode)
+      result.value = 20;
+      
+      // Verifica que o valor não mudou
+      expect(result.value).toBe(10);
+      
+      // Verifica que o objeto está congelado
+      expect(Object.isFrozen(result)).toBe(true);
     });
   });
 

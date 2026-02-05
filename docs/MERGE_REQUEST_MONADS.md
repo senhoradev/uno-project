@@ -503,17 +503,6 @@ A implementação de **Result Monad** no `scoringHistoryService` foi bem-sucedid
 - **Manutenibilidade**: +50% (padrão consistente)
 - **Curva de aprendizado**: 2-3 dias para dominar
 
-### Recomendações Futuras
-
-1. **Expandir para outros serviços**: Aplicar Result Monad em `playerService`, `gameService`, etc.
-
-2. **Migrar para TypeScript**: Aproveitar type safety completo
-
-3. **Criar helpers**: Funções utilitárias como `Result.sequence()`, `Result.traverse()`
-
-4. **Documentação**: Adicionar JSDoc com exemplos de uso
-
-5. **Linting**: Criar regras ESLint para garantir uso correto
 
 ### Considerações Finais
 
@@ -521,7 +510,7 @@ A implementação de Monads transforma tratamento de erros de **excepcional e im
 
 O padrão Result/Either prova que conceitos de programação funcional podem ser aplicados de forma pragmática em JavaScript, trazendo benefícios imediatos sem requerer migração completa para paradigma funcional.
 
-**Esta implementação demonstra que programação funcional não é apenas teoria - é uma ferramenta poderosa para escrever código melhor, mais seguro e mais fácil de manter.**
+**Esta implementação demonstra que programação funcional não é apenas teoria - é uma ferramenta para escrever código melhor, mais seguro e mais fácil de manter.**
 
 ---
 
@@ -536,7 +525,7 @@ O padrão Result/Either prova que conceitos de programação funcional podem ser
 
 ## 👤 Autor
 
-**Grazi** - Feature Branch: `feature/grazi-scoring-history`
+**Grazielle Ferreira** - Feature Branch: `feature/grazi-scoring-history`
 
 ## 📅 Data
 
