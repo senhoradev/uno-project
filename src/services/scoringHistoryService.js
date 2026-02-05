@@ -53,6 +53,8 @@ class ScoringHistoryService {
       return validationResult;
     }
 
+    
+
     // Operação de banco usando flatMap para composição
     try {
       const score = await scoringHistory.create(data);
