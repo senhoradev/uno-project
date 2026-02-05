@@ -5,6 +5,7 @@ class CreatePlayerRequestDTO {
         this.password = password;
         this.age = age;
         this.name = name;
+
     }
 
     validate() {

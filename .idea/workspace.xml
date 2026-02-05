@@ -5,9 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a00e9bd-bd77-4105-b245-53de4f8a4e35" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_26_2026_8_18_AM_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_26_2026_8_18_AM__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_26_2026_8_22_AM_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_1_26_2026_8_22_AM__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/services/playerService.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/services/playerService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DTO/Request/Game/CreateGameRequestDTO.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/DTO/Request/Game/CreateGameRequestDTO.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +65,7 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;safira&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;vitor&quot;,
     &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/pvito/Documents/Jala University/4º Semestre - 05 01 2026/1º Módulo/Programação 4/RSVDG&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -78,6 +82,13 @@
     ]
   }
 }</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\pvito\Documents\Jala University\4º Semestre - 05 01 2026\1º Módulo\Programação 4\RSVDG\src\DTO\Request\Player" />
+      <recent name="C:\Users\pvito\Documents\Jala University\4º Semestre - 05 01 2026\1º Módulo\Programação 4\RSVDG\src\DTO\Request\Cards" />
+      <recent name="C:\Users\pvito\Documents\Jala University\4º Semestre - 05 01 2026\1º Módulo\Programação 4\RSVDG\src\DTO\Request\Game" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -101,6 +112,8 @@
       <workItem from="1769426272638" duration="7117000" />
       <workItem from="1769682912321" duration="3974000" />
       <workItem from="1769688538558" duration="315000" />
+      <workItem from="1770258547183" duration="2062000" />
+      <workItem from="1770288536531" duration="2489000" />
     </task>
     <servers />
   </component>

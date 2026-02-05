@@ -2,6 +2,8 @@ class CreateGameRequestDTO {
     constructor({ name, maxPlayers }) {
         this.name = name;
         this.maxPlayers = maxPlayers;
+
+
     }
 
     validate() {
@@ -18,10 +20,6 @@ class CreateGameRequestDTO {
         }
 
         return errors;
-    }
-
-    static validate(requestBody) {
-        return new CreateGameRequestDTO(requestBody);
     }
 }
 

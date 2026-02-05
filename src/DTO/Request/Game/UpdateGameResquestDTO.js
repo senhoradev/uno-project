@@ -2,7 +2,7 @@ class UpdateGameRequestDTO {
     constructor({ title, status, maxPlayers }) {
         this.title = title;
         this.status = status;
-        this.maxPlayers = maxPlayers;
+        this.maxPlayers = maxPlayers
     }
 
     validate() {
