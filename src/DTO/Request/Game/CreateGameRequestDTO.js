@@ -21,10 +21,6 @@ class CreateGameRequestDTO {
 
         return errors;
     }
-
-    static validate(requestBody) {
-        return new CreateGameRequestDTO(requestBody);
-    }
 }
 
 module.exports = CreateGameRequestDTO;
