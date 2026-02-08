@@ -58,15 +58,25 @@ async function setupTestDatabase() {
  * Limpa todas as tabelas mas mantém a estrutura
  */
 async function cleanDatabase() {
+  // Desativar checks de FK para permitir limpeza total
   await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
   
-  // Limpar as tabelas respeitando a hierarquia de dependência
-  await Card.destroy({ where: {}, truncate: true });
-  await GamePlayer.destroy({ where: {}, truncate: true });
-  await Game.destroy({ where: {}, truncate: true });
-  await Player.destroy({ where: {}, truncate: true });
-  
-  await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+  try {
+    // A ordem de destruição importa menos com FOREIGN_KEY_CHECKS = 0, 
+    // mas a limpeza deve ser completa
+    await Card.destroy({ where: {}, force: true });
+    await GamePlayer.destroy({ where: {}, force: true });
+    await Game.destroy({ where: {}, force: true });
+    await Player.destroy({ where: {}, force: true });
+    
+    // Opcional: Reiniciar os auto-incrementos para IDs previsíveis
+    await sequelize.query('ALTER TABLE Players AUTO_INCREMENT = 1');
+    await sequelize.query('ALTER TABLE Games AUTO_INCREMENT = 1');
+  } catch (err) {
+    console.error("Erro na limpeza crítica:", err);
+  } finally {
+    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+  }
 }
 /**
  * Fecha a conexão com o banco

@@ -5,24 +5,34 @@ const { getTopCard, getScores, getCurrentPlayer } = require('../../src/services/
 describe('Coberturas de Teste 11 a 19: Fluxo de Jogo UNO', () => {
   let host, guest, game;
 
-  beforeAll(async () => await setupTestDatabase());
-  afterAll(async () => await closeDatabase());
-  beforeEach(async () => { await cleanDatabase();
-
-  // Criar jogadores e garantir que eles estão salvos
-  host = await Player.create({ 
-    username: 'host', email: 'h@t.com', password: '123', name: 'H', age: 20 
-  });
-  guest = await Player.create({ 
-    username: 'guest', email: 'g@t.com', password: '123', name: 'G', age: 22 
+  beforeAll(async () => {
+    // Força o ambiente de teste para garantir que o service use a base uno_db_test
+    process.env.NODE_ENV = 'test';
+    await setupTestDatabase();
   });
 
-  // Criar o jogo. O service já fará a vinculação automática do host
-  game = await gameService.createGame(
-    { name: 'Sala UNO', rules: 'Padrao', maxPlayers: 4 }, 
-    host.id
-  );
-});
+  afterAll(async () => {
+    await closeDatabase();
+  });
+
+  beforeEach(async () => {
+    await cleanDatabase();
+
+    // Criar jogadores garantindo a persistência antes de prosseguir
+    host = await Player.create({ 
+      username: 'host', email: 'h@t.com', password: '123', name: 'H', age: 20 
+    });
+    guest = await Player.create({ 
+      username: 'guest', email: 'g@t.com', password: '123', name: 'G', age: 22 
+    });
+
+    // Criar o jogo passando o ID como número puro para evitar falhas de casting no MySQL
+    // O criador entra automaticamente no jogo via lógica interna do service
+    game = await gameService.createGame(
+      { name: 'Sala UNO', rules: 'Padrao', maxPlayers: 4 }, 
+      Number(host.id)
+    );
+  });
 
   // 11. Ingressar em um jogo
   test('11. Deve permitir entrada de novo jogador', async () => {
@@ -33,8 +43,9 @@ describe('Coberturas de Teste 11 a 19: Fluxo de Jogo UNO', () => {
   // 12. Iniciar o jogo
   test('12. Deve iniciar o jogo se todos estiverem prontos', async () => {
     await gameService.joinGame(game.id, guest.id);
-    await gameService.toggleReady(game.id, guest.id); // Guest pronto
-    // Host já entra pronto por padrão no seu createGame
+    await gameService.toggleReady(game.id, guest.id); 
+    
+    // Inicia o jogo validando pelo ID do criador
     const success = await gameService.startGame(game.id, host.id);
     expect(success).toBe(true);
   });
@@ -46,6 +57,8 @@ describe('Coberturas de Teste 11 a 19: Fluxo de Jogo UNO', () => {
     await gameService.startGame(game.id, host.id);
     
     await gameService.leaveGame(game.id, guest.id);
+    
+    // Recarregar instância do banco para verificar status atualizado
     const updated = await Game.findByPk(game.id);
     expect(updated.status).toBe('finished');
   });
@@ -70,6 +83,7 @@ describe('Coberturas de Teste 11 a 19: Fluxo de Jogo UNO', () => {
   test('16. Deve listar nomes dos jogadores no jogo', async () => {
     await gameService.joinGame(game.id, guest.id);
     const result = await gameService.getGamePlayers(game.id);
+    
     expect(result.players).toContain('host');
     expect(result.players).toContain('guest');
   });
@@ -86,15 +100,23 @@ describe('Coberturas de Teste 11 a 19: Fluxo de Jogo UNO', () => {
 
   // 18. Carta do topo
   test('18. Deve retornar a carta do topo do descarte', async () => {
-    await Card.create({ color: 'red', action: '7', gameId: game.id });
+    // Criar uma carta vinculada ao jogo
+    await Card.create({ 
+      color: 'red', 
+      action: '7', 
+      gameId: game.id 
+    });
+    
     const card = await getTopCard(game.id);
     expect(card.color).toBe('red');
+    expect(card.action).toBe('7');
   });
 
   // 19. Pontuações
   test('19. Deve retornar pontuações de todos os jogadores', async () => {
     await gameService.joinGame(game.id, guest.id);
     const scores = await getScores(game.id);
+    
     expect(scores).toHaveProperty('host', 0);
     expect(scores).toHaveProperty('guest', 0);
   });
