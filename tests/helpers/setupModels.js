@@ -58,14 +58,16 @@ async function setupTestDatabase() {
  * Limpa todas as tabelas mas mantém a estrutura
  */
 async function cleanDatabase() {
-  // Apenas deleta os registros sem resetar IDs
-  // Isso evita conflitos com a estrutura de tabelas do Sequelize
-  await Card.destroy({ where: {} });
-  await GamePlayer.destroy({ where: {} });
-  await Game.destroy({ where: {} });
-  await Player.destroy({ where: {} });
+  await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+  
+  // Limpar as tabelas respeitando a hierarquia de dependência
+  await Card.destroy({ where: {}, truncate: true });
+  await GamePlayer.destroy({ where: {}, truncate: true });
+  await Game.destroy({ where: {}, truncate: true });
+  await Player.destroy({ where: {}, truncate: true });
+  
+  await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
 }
-
 /**
  * Fecha a conexão com o banco
  */
