@@ -1,123 +1,141 @@
-const { Game, Player, GamePlayer, Card, setupTestDatabase, cleanDatabase, closeDatabase } = require('../helpers/setupModels');
+/**
+ * @fileoverview Testes de lógica de jogo (11 a 19) 
+ */
+
+jest.mock('../../src/models/game');
+jest.mock('../../src/models/player');
+jest.mock('../../src/models/gamePlayer');
+jest.mock('../../src/models/card');
+
+const Game = require('../../src/models/game');
+const GamePlayer = require('../../src/models/gamePlayer');
+const Card = require('../../src/models/card');
 const gameService = require('../../src/services/gameService');
 const { getTopCard, getScores, getCurrentPlayer } = require('../../src/services/gameService');
 
-describe('Coberturas de Teste 11 a 19: Fluxo de Jogo UNO', () => {
-  let host, guest, game;
-
-  beforeAll(async () => {
-    // Força o ambiente de teste para garantir que o service use a base uno_db_test
-    process.env.NODE_ENV = 'test';
-    await setupTestDatabase();
+describe('Coberturas de Teste 11 a 19: Fluxo de Jogo UNO (Mocked Mode)', () => {
+  
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  afterAll(async () => {
-    await closeDatabase();
-  });
-
-  beforeEach(async () => {
-    await cleanDatabase();
-
-    // Criar jogadores garantindo a persistência antes de prosseguir
-    host = await Player.create({ 
-      username: 'host', email: 'h@t.com', password: '123', name: 'H', age: 20 
-    });
-    guest = await Player.create({ 
-      username: 'guest', email: 'g@t.com', password: '123', name: 'G', age: 22 
+  test('11. Testa joinGame() garantindo entrada apenas se houver vagas', async () => {
+    Game.findByPk.mockResolvedValue({
+      id: 1, 
+      status: 'waiting', 
+      maxPlayers: 2,
+      getPlayers: jest.fn().mockResolvedValue([{ id: 101 }])
     });
 
-    // Criar o jogo passando o ID como número puro para evitar falhas de casting no MySQL
-    // O criador entra automaticamente no jogo via lógica interna do service
-    game = await gameService.createGame(
-      { name: 'Sala UNO', rules: 'Padrao', maxPlayers: 4 }, 
-      Number(host.id)
-    );
+    const result = await gameService.joinGame(1, 102);
+    expect(result).toBe(true);
   });
 
-  // 11. Ingressar em um jogo
-  test('11. Deve permitir entrada de novo jogador', async () => {
-    const success = await gameService.joinGame(game.id, guest.id);
-    expect(success).toBe(true);
+  test('12. Valida startGame() permitindo início apenas se 2+ jogadores estiverem prontos', async () => {
+    // Mock do Jogo
+    Game.findByPk.mockResolvedValue({
+      id: 1, 
+      creatorId: 101,
+      update: jest.fn().mockResolvedValue(true)
+    });
+
+    // Mock dos Jogadores com função update para definir o turno inicial
+    GamePlayer.findAll.mockResolvedValue([
+      { playerId: 101, isReady: true, update: jest.fn().mockResolvedValue(true) },
+      { playerId: 102, isReady: true, update: jest.fn().mockResolvedValue(true) }
+    ]);
+
+    const result = await gameService.startGame(1, 101);
+    expect(result).toBe(true);
   });
 
-  // 12. Iniciar o jogo
-  test('12. Deve iniciar o jogo se todos estiverem prontos', async () => {
-    await gameService.joinGame(game.id, guest.id);
-    await gameService.toggleReady(game.id, guest.id); 
-    
-    // Inicia o jogo validando pelo ID do criador
-    const success = await gameService.startGame(game.id, host.id);
-    expect(success).toBe(true);
-  });
-
-  // 13. Sair do jogo
-  test('13. Deve permitir sair e encerrar se restar apenas 1', async () => {
-    await gameService.joinGame(game.id, guest.id);
-    await gameService.toggleReady(game.id, guest.id);
-    await gameService.startGame(game.id, host.id);
-    
-    await gameService.leaveGame(game.id, guest.id);
-    
-    // Recarregar instância do banco para verificar status atualizado
-    const updated = await Game.findByPk(game.id);
-    expect(updated.status).toBe('finished');
-  });
-
-  // 14. Finalizar jogo (Manual)
-  test('14. Criador deve poder finalizar o jogo', async () => {
-    await gameService.joinGame(game.id, guest.id);
-    await gameService.toggleReady(game.id, guest.id);
-    await gameService.startGame(game.id, host.id);
-    
-    const success = await gameService.endGame(game.id, host.id);
-    expect(success).toBe(true);
-  });
-
-  // 15. Estado atual
-  test('15. Deve retornar estado do jogo', async () => {
-    const state = await gameService.getGameState(game.id);
-    expect(state.state).toBe('waiting');
-  });
-
-  // 16. Lista de jogadores
-  test('16. Deve listar nomes dos jogadores no jogo', async () => {
-    await gameService.joinGame(game.id, guest.id);
-    const result = await gameService.getGamePlayers(game.id);
-    
-    expect(result.players).toContain('host');
-    expect(result.players).toContain('guest');
-  });
-
-  // 17. Jogador atual (Turno)
-  test('17. Deve identificar quem deve jogar', async () => {
-    await gameService.joinGame(game.id, guest.id);
-    await gameService.toggleReady(game.id, guest.id);
-    await gameService.startGame(game.id, host.id);
-    
-    const currentPlayer = await getCurrentPlayer(game.id);
-    expect(currentPlayer).toBe('host');
-  });
-
-  // 18. Carta do topo
-  test('18. Deve retornar a carta do topo do descarte', async () => {
-    // Criar uma carta vinculada ao jogo
-    await Card.create({ 
-      color: 'red', 
-      action: '7', 
-      gameId: game.id 
+  test('13. Testa leaveGame() finalizando jogo se restar apenas um', async () => {
+    const mockUpdate = jest.fn().mockResolvedValue(true);
+    Game.findByPk.mockResolvedValue({
+      id: 1, 
+      status: 'started', 
+      update: mockUpdate
     });
     
-    const card = await getTopCard(game.id);
-    expect(card.color).toBe('red');
-    expect(card.action).toBe('7');
+    // Mock do jogador a ser removido com função destroy
+    GamePlayer.findOne.mockResolvedValue({ 
+      id: 50, 
+      playerId: 102,
+      destroy: jest.fn().mockResolvedValue(true) 
+    });
+    
+    // Simula que resta apenas 1 jogador após a saída
+    GamePlayer.count.mockResolvedValue(1);
+
+    await gameService.leaveGame(1, 102);
+    expect(mockUpdate).toHaveBeenCalledWith({ status: 'finished' });
   });
 
-  // 19. Pontuações
-  test('19. Deve retornar pontuações de todos os jogadores', async () => {
-    await gameService.joinGame(game.id, guest.id);
-    const scores = await getScores(game.id);
+  test('14. Valida endGame() garantindo que apenas o criador encerre', async () => {
+    const mockUpdate = jest.fn().mockResolvedValue(true);
+    Game.findByPk.mockResolvedValue({ 
+      id: 1, 
+      creatorId: 101, 
+      status: 'started',
+      update: mockUpdate 
+    });
     
-    expect(scores).toHaveProperty('host', 0);
-    expect(scores).toHaveProperty('guest', 0);
+    // Deve lançar erro se o userId não for o do criador
+    await expect(gameService.endGame(1, 102)).rejects.toThrow();
+    
+    // Deve retornar true se for o criador
+    const success = await gameService.endGame(1, 101);
+    expect(success).toBe(true);
+    expect(mockUpdate).toHaveBeenCalledWith({ status: 'finished' });
+  });
+
+  test('15. Testa getGameState() para confirmar o status atual do jogo', async () => {
+    Game.findByPk.mockResolvedValue({ id: 1, status: 'waiting' });
+    
+    const result = await gameService.getGameState(1);
+    expect(result.state).toBe('waiting');
+  });
+
+  test('16. Testa getGamePlayers() retornando nomes dos participantes', async () => {
+    Game.findByPk.mockResolvedValue({ id: 1 });
+    GamePlayer.findAll.mockResolvedValue([
+      { Player: { username: 'player1' }, playerId: 101 },
+      { Player: { username: 'player2' }, playerId: 102 }
+    ]);
+
+    const result = await gameService.getGamePlayers(1);
+    expect(result.players).toContain('player1');
+    expect(result.players).toContain('player2');
+  });
+
+  test('17. Testa getCurrentPlayer() verificando flag isCurrentTurn', async () => {
+    Game.findByPk.mockResolvedValue({ id: 1 });
+    GamePlayer.findOne.mockResolvedValue({
+      Player: { username: 'player1' }
+    });
+
+    const result = await getCurrentPlayer(1);
+    expect(result).toBe('player1');
+  });
+
+  test('18. Testa getTopCard() recuperando a carta mais recente vinculada ao jogo', async () => {
+    Game.findByPk.mockResolvedValue({ id: 1 });
+    Card.findOne.mockResolvedValue({ color: 'blue', action: 'reverse' });
+
+    const result = await getTopCard(1);
+    expect(result.color).toBe('blue');
+    expect(result.action).toBe('reverse');
+  });
+
+  test('19. Testa getScores() garantindo retorno das pontuações dos jogadores', async () => {
+    Game.findByPk.mockResolvedValue({ id: 1 });
+    GamePlayer.findAll.mockResolvedValue([
+      { Player: { username: 'p1' }, score: 50 },
+      { Player: { username: 'p2' }, score: 30 }
+    ]);
+
+    const scores = await getScores(1);
+    expect(scores.p1).toBe(50);
+    expect(scores.p2).toBe(30);
   });
 });
