@@ -3,7 +3,7 @@
  * @module controllers/loginController
  */
 
-const playerService = require('../services/playerService');
+const loginService = require('../services/loginService'); 
 const PlayerDTO = require('../DTO/Response/PlayerResponseDTO');
 
 /**
@@ -19,10 +19,12 @@ const PlayerDTO = require('../DTO/Response/PlayerResponseDTO');
 exports.login = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const result = await playerService.login(username, password);
+    // O método no seu loginService.js é 'authenticate'
+    const result = await loginService.authenticate(username, password);
+    
     return res.json(result); 
   } catch (error) {
-    console.error("Erro no Login:", error.message); // Adicione isto para depurar
+    console.error("Erro no Login:", error.message);
     return res.status(401).json({
       error: "Invalid credentials"
     });
@@ -37,8 +39,6 @@ exports.login = async (req, res) => {
  * @returns {Promise<Object>} Retorna mensagem de sucesso.
  */
 exports.logout = async (req, res) => {
-  // Em JWT o logout é comumente invalidado no cliente (removendo o token), 
-  // mas aqui retornamos a confirmação solicitada pela API.
   return res.json({
     message: "User logged out successfully"
   });
@@ -56,14 +56,21 @@ exports.logout = async (req, res) => {
 exports.profile = async (req, res) => {
   try {
     const { access_token } = req.body;
-    const profile = await playerService.getProfile(access_token);
     
-    // Retorno manual para cumprir exatamente o Requisito 4
+    // O profile já retorna { username, email } do loginService
+    const profile = await loginService.getProfile(access_token);
+    
+    // OPÇÃO A: Se o DTO for apenas para limpar os dados, use assim:
+    const responseData = new PlayerDTO(profile);
+    
+    // Retorne diretamente o objeto do DTO
     return res.json({
-      username: profile.username,
-      email: profile.email
+      username: responseData.username,
+      email: responseData.email
     });
+    
   } catch (error) {
+    console.error("Erro no Profile:", error.message);
     return res.status(401).json({ error: "Invalid token" });
   }
 };
