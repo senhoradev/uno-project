@@ -216,6 +216,15 @@ class PlayerService {
       }
     });
   }
+
+  // Lista todos os jogadores
+  async getAllPlayers() {
+    const players = await Player.findAll({
+      attributes: ['id', 'username', 'email', 'createdAt']
+    });
+    return players;
+  }
+
 }
 
 module.exports = new PlayerService();

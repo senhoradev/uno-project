@@ -83,6 +83,13 @@ exports.delete = async (req, res) => {
   if (result.isErr()) {
     return sendErrorResponse(res, result.error);
   }
+};
 
-  return res.json(result.value);
+exports.getAll = async (req, res) => {
+  try {
+    const players = await playerService.getAllPlayers();
+    res.json(players);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 };

@@ -178,10 +178,153 @@ src/
     scoringHistoryService.js     # Serviço refatorado com Result
   controllers/
     scoringHistoryController.js  # Controller usando fold()
+  routes/
+    scoringHistoryRoutes.js      # Rotas HTTP para scoring history
 tests/
   unit/
     result.test.js              # Testes das leis de Functor/Monad
     scoringHistoryService.monad.test.js  # Testes de integração
+```
+
+### Rotas Disponíveis
+
+#### GET /api/scoring-history
+Lista todos os scores do histórico.
+
+**Response Success (200):**
+```json
+[
+  {
+    "id": 1,
+    "score": 100,
+    "playerId": 1,
+    "gameId": 1,
+    "createdAt": "2026-02-05T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "score": 150,
+    "playerId": 2,
+    "gameId": 1,
+    "createdAt": "2026-02-05T10:05:00.000Z"
+  }
+]
+```
+
+**Response Failure (500):**
+```json
+{
+  "error": "Erro ao listar pontuações",
+  "code": "DATABASE_ERROR",
+  "details": "Database connection failed"
+}
+```
+
+#### POST /api/scoring-history
+Cria um novo registro de pontuação.
+
+**Request Body:**
+```json
+{
+  "score": 100,
+  "playerId": 1,
+  "gameId": 1,
+  "details": "Vencedor da rodada"
+}
+```
+
+**Response Success (201):**
+```json
+{
+  "id": 1,
+  "score": 100,
+  "playerId": 1,
+  "gameId": 1,
+  "createdAt": "2026-02-05T10:00:00.000Z",
+  "updatedAt": "2026-02-05T10:00:00.000Z"
+}
+```
+
+**Response Failure (400):**
+```json
+{
+  "error": "A pontuação (score) é obrigatória",
+  "code": "VALIDATION_ERROR",
+  "field": "score"
+}
+```
+
+#### GET /api/scoring-history/:id
+Busca um score específico por ID.
+
+**Response Success (200):**
+```json
+{
+  "id": 1,
+  "score": 100,
+  "playerId": 1,
+  "gameId": 1,
+  "createdAt": "2026-02-05T10:00:00.000Z",
+  "updatedAt": "2026-02-05T10:00:00.000Z"
+}
+```
+
+**Response Failure (404):**
+```json
+{
+  "error": "Score não encontrado",
+  "code": "NOT_FOUND"
+}
+```
+
+#### PUT /api/scoring-history/:id
+Atualiza um score existente.
+
+**Request Body:**
+```json
+{
+  "score": 200,
+  "details": "Pontuação atualizada"
+}
+```
+
+**Response Success (200):**
+```json
+{
+  "id": 1,
+  "score": 200,
+  "playerId": 1,
+  "gameId": 1,
+  "createdAt": "2026-02-05T10:00:00.000Z",
+  "updatedAt": "2026-02-05T10:10:00.000Z"
+}
+```
+
+**Response Failure (404):**
+```json
+{
+  "error": "Score não encontrado",
+  "code": "NOT_FOUND"
+}
+```
+
+#### DELETE /api/scoring-history/:id
+Remove um score do histórico.
+
+**Response Success (200):**
+```json
+{
+  "message": "Score removido com sucesso",
+  "id": 1
+}
+```
+
+**Response Failure (404):**
+```json
+{
+  "error": "Score não encontrado",
+  "code": "NOT_FOUND"
+}
 ```
 
 ### Classe Result Monad
@@ -503,17 +646,6 @@ A implementação de **Result Monad** no `scoringHistoryService` foi bem-sucedid
 - **Manutenibilidade**: +50% (padrão consistente)
 - **Curva de aprendizado**: 2-3 dias para dominar
 
-### Recomendações Futuras
-
-1. **Expandir para outros serviços**: Aplicar Result Monad em `playerService`, `gameService`, etc.
-
-2. **Migrar para TypeScript**: Aproveitar type safety completo
-
-3. **Criar helpers**: Funções utilitárias como `Result.sequence()`, `Result.traverse()`
-
-4. **Documentação**: Adicionar JSDoc com exemplos de uso
-
-5. **Linting**: Criar regras ESLint para garantir uso correto
 
 ### Considerações Finais
 
@@ -521,7 +653,7 @@ A implementação de Monads transforma tratamento de erros de **excepcional e im
 
 O padrão Result/Either prova que conceitos de programação funcional podem ser aplicados de forma pragmática em JavaScript, trazendo benefícios imediatos sem requerer migração completa para paradigma funcional.
 
-**Esta implementação demonstra que programação funcional não é apenas teoria - é uma ferramenta poderosa para escrever código melhor, mais seguro e mais fácil de manter.**
+**Esta implementação demonstra que programação funcional não é apenas teoria - é uma ferramenta para escrever código melhor, mais seguro e mais fácil de manter.**
 
 ---
 
@@ -536,7 +668,7 @@ O padrão Result/Either prova que conceitos de programação funcional podem ser
 
 ## 👤 Autor
 
-**Grazi** - Feature Branch: `feature/grazi-scoring-history`
+**Grazielle Ferreira** - Feature Branch: `feature/grazi-scoring-history`
 
 ## 📅 Data
 
