@@ -9,13 +9,22 @@ const Player = require('../../src/models/player');
 const Game = require('../../src/models/game');
 const GamePlayer = require('../../src/models/gamePlayer');
 const Card = require('../../src/models/card');
+const ScoringHistory = require('../../src/models/scoringHistory');
 require('dotenv').config();
 
-// Configurar as associações
-GamePlayer.belongsTo(Player, { foreignKey: 'playerId' });
-GamePlayer.belongsTo(Game, { foreignKey: 'gameId' });
-Player.hasMany(GamePlayer, { foreignKey: 'playerId' });
-Game.hasMany(GamePlayer, { foreignKey: 'gameId' });
+// Configurar as associações apenas se ainda não foram configuradas e se não estão mockadas
+try {
+  if (!GamePlayer.associations || Object.keys(GamePlayer.associations).length === 0) {
+    if (typeof GamePlayer.belongsTo === 'function') {
+      GamePlayer.belongsTo(Player, { foreignKey: 'playerId' });
+      GamePlayer.belongsTo(Game, { foreignKey: 'gameId' });
+      Player.hasMany(GamePlayer, { foreignKey: 'playerId' });
+      Game.hasMany(GamePlayer, { foreignKey: 'gameId' });
+    }
+  }
+} catch (error) {
+  // Ignora erros de associação quando modelos estão mockados
+}
 
 /**
  * Cria o banco de dados de teste se não existir
@@ -93,5 +102,6 @@ module.exports = {
   Player,
   Game,
   GamePlayer,
+  ScoringHistory,
   Card
 };

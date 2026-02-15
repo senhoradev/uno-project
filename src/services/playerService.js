@@ -56,13 +56,13 @@ class PlayerService {
       const hashedPassword = await bcrypt.hash(password, 10);
       
       // 4. Persistência no Repositório
-      await playerRepository.save({
+      const savedPlayer = await playerRepository.save({
         ...playerToSave,
         password: hashedPassword
       });
 
       // Retorna sucesso encapsulando o DTO de resposta
-      return Result.success(new PlayerResponseDTO(username, email));
+      return Result.success(new PlayerResponseDTO({ username, email }));
     } catch (error) {
       return Result.failure({ 
         message: 'Erro ao criar jogador no banco de dados', 
@@ -148,7 +148,7 @@ class PlayerService {
         });
       }
       
-      return Result.success(new PlayerResponseDTO(player.username, player.email));
+      return Result.success(new PlayerResponseDTO(player));
     } catch (error) {
       return Result.failure({ 
         message: 'Erro ao buscar jogador', 
@@ -179,8 +179,8 @@ class PlayerService {
           data.password = await bcrypt.hash(data.password, 10);
         }
 
-        await playerRepository.update(id, data);
-        return Result.success(new PlayerResponseDTO(data.username, data.email));
+        const updated = await playerRepository.update(id, data);
+        return Result.success(new PlayerResponseDTO({ username: data.username, email: data.email }));
       } catch (error) {
         return Result.failure({ 
           message: 'Erro ao atualizar dados do jogador', 
