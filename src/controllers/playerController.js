@@ -1,72 +1,88 @@
 const playerService = require('../services/playerService');
-require('../DTO/Response/PlayerResponseDTO')
+const PlayerResponseDTO = require('../DTO/Response/PlayerResponseDTO');
 
+/**
+ * Função utilitária para centralizar o tratamento de erros do Result Monad
+ * e mapear para os status HTTP corretos.
+ */
+const sendErrorResponse = (res, error) => {
+  const statusMap = {
+    'VALIDATION_ERROR': 400,
+    'CONFLICT': 409,
+    'UNAUTHORIZED': 401,
+    'NOT_FOUND': 404,
+    'DATABASE_ERROR': 500,
+    'AUTH_ERROR': 401
+  };
 
-exports.register = async (req, res) => {
-  try {
-    const userResponse = await playerService.createPlayer(req.body);
-
-    return res.status(201).json(userResponse);
-  } catch (error) {
-    if (error.message === 'User already exists') {
-      return res.status(400).json({ error: 'User already exists' });
-    }
-
-    return res.status(400).json({ error: error.message });
-  }
+  return res.status(statusMap[error.code] || 400).json({
+    error: error.message,
+    code: error.code
+  });
 };
 
+exports.register = async (req, res) => {
+  const result = await playerService.createPlayer(req.body);
+  
+  if (result.isErr()) {
+    return sendErrorResponse(res, result.error);
+  }
+
+  // Mantém o uso da DTO para a resposta
+  const response = new PlayerResponseDTO(result.value.username, result.value.email);
+  return res.status(201).json(response);
+};
 
 exports.login = async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const result = await playerService.login(username, password);
-    
-    // Retorna o token de acesso em caso de sucesso
-    res.json(result);
-  } catch (error) {
-    // Retorna erro de credenciais inválidas conforme solicitado
-    if (error.message === 'Invalid credentials') {
-      return res.status(401).json({
-        "error": "Invalid credentials"
-      });
-    }
-    res.status(500).json({ error: "Internal server error" });
+  const { username, password } = req.body;
+  const result = await playerService.login(username, password);
+  
+  if (result.isErr()) {
+    return sendErrorResponse(res, result.error);
   }
+
+  return res.json(result.value);
 };
 
 exports.create = async (req, res) => {
-  try {
-    const player = await playerService.createPlayer(req.body);
-    res.status(201).json(player);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  const result = await playerService.createPlayer(req.body);
+  
+  if (result.isErr()) {
+    return sendErrorResponse(res, result.error);
   }
+
+  const response = new PlayerResponseDTO(result.value.username, result.value.email);
+  return res.status(201).json(response);
 };
 
 exports.getById = async (req, res) => {
-  try {
-    const player = await playerService.getPlayerById(req.params.id);
-    res.json(player);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
+  const result = await playerService.getPlayerById(req.params.id);
+  
+  if (result.isErr()) {
+    return sendErrorResponse(res, result.error);
   }
+
+  const response = new PlayerResponseDTO(result.value.username, result.value.email);
+  return res.json(response);
 };
 
 exports.update = async (req, res) => {
-  try {
-    const player = await playerService.updatePlayer(req.params.id, req.body);
-    res.json(player);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+  const result = await playerService.updatePlayer(req.params.id, req.body);
+  
+  if (result.isErr()) {
+    return sendErrorResponse(res, result.error);
   }
+
+  const response = new PlayerResponseDTO(result.value.username, result.value.email);
+  return res.json(response);
 };
 
 exports.delete = async (req, res) => {
-  try {
-    const result = await playerService.deletePlayer(req.params.id);
-    res.json(result);
-  } catch (error) {
-    res.status(404).json({ error: error.message });
+  const result = await playerService.deletePlayer(req.params.id);
+  
+  if (result.isErr()) {
+    return sendErrorResponse(res, result.error);
   }
+
+  return res.json(result.value);
 };
