@@ -11,3 +11,6 @@ npm-debug.log*
 .idea/
 .DS_Store
 dist/
+
+# Coverage (relatórios de teste gerados)
+coverage/
