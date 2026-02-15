@@ -49,6 +49,7 @@ describe('Coberturas de Teste 6 a 9', () => {
     test('Deve realizar login com credenciais válidas', async () => {
       const result = await loginService.authenticate('auth_user', 'password123');
       expect(result).toHaveProperty('access_token');
+      expect(result.access_token).toBeDefined();
     });
 
     test('Deve falhar login com senha incorreta', async () => {
