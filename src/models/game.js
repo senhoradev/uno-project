@@ -4,7 +4,7 @@
  */
 
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+const sequelize = require('../config/database.selector');
 
 /**
  * Modelo Game - Representa um jogo no sistema

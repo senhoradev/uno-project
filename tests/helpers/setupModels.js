@@ -28,28 +28,12 @@ try {
 
 /**
  * Cria o banco de dados de teste se não existir
+ * Para SQLite em memória, não precisa criar banco
  */
 async function createTestDatabaseIfNotExists() {
-  const tempSequelize = new Sequelize('', 
-    process.env.DB_USER || 'root',
-    process.env.DB_PASS || '',
-    {
-      host: process.env.DB_HOST || 'localhost',
-      dialect: 'mysql',
-      logging: false
-    }
-  );
-
-  try {
-    const dbName = process.env.DB_NAME_TEST || 'uno_db_test';
-    await tempSequelize.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\`;`);
-    console.log(`Banco de dados de teste '${dbName}' criado ou já existe.`);
-  } catch (error) {
-    console.error('Erro ao criar banco de dados de teste:', error);
-    throw error;
-  } finally {
-    await tempSequelize.close();
-  }
+  // SQLite em memória não precisa criar banco
+  // Esta função fica vazia mas mantemos para compatibilidade
+  return Promise.resolve();
 }
 
 /**
@@ -58,33 +42,23 @@ async function createTestDatabaseIfNotExists() {
  */
 async function setupTestDatabase() {
   await createTestDatabaseIfNotExists();
-  await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
+  // SQLite não precisa de FOREIGN_KEY_CHECKS
   await sequelize.sync({ force: true });
-  await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
 }
 
 /**
  * Limpa todas as tabelas mas mantém a estrutura
  */
 async function cleanDatabase() {
-  // Desativar checks de FK para permitir limpeza total
-  await sequelize.query('SET FOREIGN_KEY_CHECKS = 0');
-  
   try {
-    // A ordem de destruição importa menos com FOREIGN_KEY_CHECKS = 0, 
-    // mas a limpeza deve ser completa
-    await Card.destroy({ where: {}, force: true });
-    await GamePlayer.destroy({ where: {}, force: true });
-    await Game.destroy({ where: {}, force: true });
-    await Player.destroy({ where: {}, force: true });
-    
-    // Opcional: Reiniciar os auto-incrementos para IDs previsíveis
-    await sequelize.query('ALTER TABLE Players AUTO_INCREMENT = 1');
-    await sequelize.query('ALTER TABLE Games AUTO_INCREMENT = 1');
+    // SQLite permite truncar diretamente
+    await Card.destroy({ where: {}, truncate: true, cascade: true });
+    await GamePlayer.destroy({ where: {}, truncate: true, cascade: true });
+    await Game.destroy({ where: {}, truncate: true, cascade: true });
+    await Player.destroy({ where: {}, truncate: true, cascade: true });
+    await ScoringHistory.destroy({ where: {}, truncate: true, cascade: true });
   } catch (err) {
-    console.error("Erro na limpeza crítica:", err);
-  } finally {
-    await sequelize.query('SET FOREIGN_KEY_CHECKS = 1');
+    console.error("Erro na limpeza:", err);
   }
 }
 /**

@@ -11,8 +11,14 @@ process.env.NODE_ENV = 'test';
 
 // Fecha todas as conexões do Sequelize após todos os testes
 afterAll(async () => {
-  const { closeDatabase } = require('./helpers/setupModels');
-  await closeDatabase();
+  try {
+    const sequelize = require('../src/config/database.test');
+    if (sequelize && typeof sequelize.close === 'function') {
+      await sequelize.close();
+    }
+  } catch (error) {
+    // Ignora erros se já estiver fechado
+  }
 });
 
 // Mock console para evitar poluição de logs durante testes

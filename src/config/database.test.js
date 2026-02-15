@@ -6,22 +6,17 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Usar banco de testes separado
-const sequelize = new Sequelize(
-  process.env.DB_NAME_TEST || 'uno_db_test',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASS || '2706',
-  {
-    host: process.env.DB_HOST || 'localhost',
-    dialect: 'mysql',
-    logging: false, // Desabilita logs no teste
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    }
+// Usar SQLite em memória para testes (não precisa de servidor MySQL rodando)
+const sequelize = new Sequelize({
+  dialect: 'sqlite',
+  storage: ':memory:', // Banco em memória - rápido e sem dependências
+  logging: false, // Desabilita logs no teste
+  pool: {
+    max: 5,
+    min: 0,
+    acquire: 30000,
+    idle: 10000
   }
-);
+});
 
 module.exports = sequelize;
