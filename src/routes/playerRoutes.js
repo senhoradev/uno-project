@@ -4,6 +4,8 @@ const router = express.Router(); // Cria uma instância para definir as rotas
 // Importa a lógica de manipulação dos jogadores
 const playerController = require('../controllers/playerController');
 
+// Rota para listar todos os jogadores (GET /)
+router.get('/', playerController.getAll);
 // Rota para criar um novo jogador (POST /)
 router.post('/', playerController.create);
 // Rota para buscar um jogador pelo ID (GET /:id)

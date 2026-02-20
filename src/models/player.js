@@ -1,8 +1,17 @@
-const { DataTypes } = require('sequelize'); // Importa os tipos de dados do Sequelize para definir os campos do modelo
-const sequelize = require('../config/database'); 
+const { DataTypes } = require('sequelize'); // Importa os tipos de dados do Sequelize
+const sequelize = require('../config/database.selector'); // Importa a conexão com o banco (selecionada por ambiente)
 
 // Define o modelo 'Player' da tabela no banco de dados
 const Player = sequelize.define('Player', {
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true // Garante que não haja nomes de usuário duplicados
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false
@@ -14,8 +23,9 @@ const Player = sequelize.define('Player', {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
-    unique: true
+    unique: true // Garante que o e-mail seja único no sistema
   }
 });
 
-module.exports = Player; // Exporta o modelo para ser utilizado nos controllers e services
+// Exporta o modelo para ser utilizado nos controllers e services
+module.exports = Player;

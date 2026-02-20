@@ -1,32 +1,31 @@
-const { DataTypes } = require('sequelize'); // Importa os tipos de dados do Sequelize para definir os campos do modelo
-const sequelize = require('../config/database');
- 
- 
-// Define o modelo 'ScoringHistory' da tabela no banco de dados
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/database.selector');
+
 const ScoringHistory = sequelize.define('ScoringHistory', {
- 
   playerId: {
-    type: DataTypes.STRING,
-    allowNull: false
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      isInt: { msg: "O ID do jogador deve ser um número inteiro." },
+      notNull: { msg: "O ID do jogador é obrigatório." }
+    }
   },
   gameId: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    validate: {
+      isInt: { msg: "O ID do jogo deve ser um número inteiro." },
+      notNull: { msg: "O ID do jogo é obrigatório." }
+    }
   },
   score: {
     type: DataTypes.INTEGER,
     allowNull: false,
-  },
-  scoreId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    unique: true
-  },
-  date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: DataTypes.NOW
+    validate: {
+      isInt: { msg: "A pontuação deve ser um número inteiro." },
+      notNull: { msg: "A pontuação é obrigatória." }
+    }
   }
 });
- 
-module.exports = ScoringHistory; // Exporta o modelo para ser utilizado nos controllers e services
+
+module.exports = ScoringHistory;

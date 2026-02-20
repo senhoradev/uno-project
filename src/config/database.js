@@ -5,8 +5,9 @@ require('dotenv').config();
 
 const DB_NAME = process.env.DB_NAME || 'unodb';
 const DB_USER = process.env.DB_USER || 'root';
-const DB_PASS = process.env.DB_PASS || '';
-const DB_HOST = process.env.DB_HOST || 'localhost';
+const DB_PASS = process.env.DB_PASS || '121418';
+const DB_HOST = process.env.DB_HOST || '127.0.0.1';
+const DB_PORT = process.env.DB_PORT ||  3307;
 
 /**
  * Cria o banco de dados se não existir
@@ -18,7 +19,8 @@ async function createDatabaseIfNotExists() {
     const connection = await mysql.createConnection({
       host: DB_HOST,
       user: DB_USER,
-      password: DB_PASS
+      password: DB_PASS,
+      port: DB_PORT
     });
     
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\`;`);
@@ -33,6 +35,7 @@ async function createDatabaseIfNotExists() {
 const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASS, {
   host: DB_HOST,
   dialect: 'mysql',
+  port: DB_PORT,
   logging: false
 });
 

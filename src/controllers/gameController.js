@@ -5,117 +5,186 @@
 
 const gameService = require('../services/gameService');
 
-/**
- * Formata erros do Sequelize para resposta da API
- * @param {Error} error - Erro capturado
- * @returns {Object} Objeto com erro(s) formatado(s)
- */
-const formatError = (error) => {
-  // Se for erro de validação do Sequelize com múltiplos erros
-  if (error.name === 'SequelizeValidationError') {
-    const errors = error.errors.map(err => ({
-      field: err.path,
-      message: err.message
-    }));
-    return { errors };
-  }
-  
-  // Se for erro de constraint única (ex: título duplicado)
-  if (error.name === 'SequelizeUniqueConstraintError') {
-    return { error: 'Registro já existe com esses dados' };
-  }
-  
-  // Erro genérico
-  return { error: error.message };
-};
 
-/**
- * Cria um novo jogo
- * @async
- * @function create
- * @param {Object} req - Objeto de requisição Express
- * @param {Object} req.body - Corpo da requisição
- * @param {string} req.body.title - Título do jogo
- * @param {string} [req.body.status='active'] - Status do jogo
- * @param {number} [req.body.maxPlayers=4] - Número máximo de jogadores
- * @param {Object} res - Objeto de resposta Express
- * @returns {Promise<void>} Retorna o jogo criado com status 201 ou erro 400
- */
 exports.create = async (req, res) => {
   try {
-    console.log(`[POST /api/games] Criando jogo: ${JSON.stringify(req.body)}`);
-    const game = await gameService.createGame(req.body);
-    console.log(`[POST /api/games] ✓ Jogo criado com sucesso - ID: ${game.id}, Título: ${game.title}`);
-    res.status(201).json(game);
+    const game = await gameService.createGame(req.body, req.user.id);
+    return res.status(201).json({ 
+      message: "Game created successfully", 
+      game_id: game.id 
+    });
   } catch (error) {
-    console.error(`[POST /api/games] ✗ Erro ao criar jogo: ${error.message}`);
-    res.status(400).json(formatError(error));
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+exports.join = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    await gameService.joinGame(game_id, req.user.id);
+    return res.json({ message: 'User joined the game successfully' });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
   }
 };
 
 /**
- * Busca um jogo pelo ID
- * @async
- * @function getById
- * @param {Object} req - Objeto de requisição Express
- * @param {Object} req.params - Parâmetros da URL
- * @param {string} req.params.id - ID do jogo
- * @param {Object} res - Objeto de resposta Express
- * @returns {Promise<void>} Retorna o jogo encontrado ou erro 404
+ * Alterna o status de "pronto" do jogador no jogo
  */
+exports.toggleReady = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const result = await gameService.toggleReady(game_id, req.user.id);
+    return res.json({ 
+      message: result.message,
+      isReady: result.isReady 
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+
+exports.start = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    await gameService.startGame(game_id, req.user.id);
+    return res.json({ message: 'Game started successfully' });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Abandona um jogo em progresso
+ */
+exports.leave = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    await gameService.leaveGame(game_id, req.user.id);
+    return res.json({ message: 'User left the game successfully' });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Finaliza um jogo 
+ */
+exports.end = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    await gameService.endGame(game_id, req.user.id);
+    return res.json({ message: 'Game ended successfully' });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém o estado atual do jogo 
+ */
+exports.getState = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const state = await gameService.getGameState(game_id);
+    return res.json(state);
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém a lista de jogadores no jogo 
+ */
+exports.getPlayers = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const players = await gameService.getGamePlayers(game_id);
+    return res.json(players);
+  } catch (error) {
+    return res.status(404).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém o jogador atual que deve jogar uma carta
+ */
+exports.getCurrentPlayer = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const currentPlayer = await gameService.getCurrentPlayer(game_id);
+    return res.json({
+      game_id,
+      current_player: currentPlayer
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém a carta do topo da pilha de descarte
+ */
+exports.getTopCard = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const topCard = await gameService.getTopCard(game_id);
+    return res.json({
+      game_id,
+      top_card: topCard
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém as pontuações atuais de todos os jogadores
+ */
+exports.getScores = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const scores = await gameService.getScores(game_id);
+    return res.json({
+      game_id,
+      scores
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
 exports.getById = async (req, res) => {
   try {
-    console.log(`[GET /api/games/${req.params.id}] Buscando jogo...`);
     const game = await gameService.getGameById(req.params.id);
-    console.log(`[GET /api/games/${req.params.id}] ✓ Jogo encontrado: ${game.title}`);
-    res.json(game);
+    // Retornando os dados sem a necessidade da classe DTO
+    return res.json({
+      id: game.id,
+      name: game.name,
+      rules: game.rules,
+      status: game.status,
+      maxPlayers: game.maxPlayers
+    });
   } catch (error) {
-    console.error(`[GET /api/games/${req.params.id}] ✗ Erro: ${error.message}`);
-    res.status(404).json(formatError(error));
+    return res.status(404).json({ error: error.message });
   }
 };
 
-/**
- * Atualiza um jogo existente
- * @async
- * @function update
- * @param {Object} req - Objeto de requisição Express
- * @param {Object} req.params - Parâmetros da URL
- * @param {string} req.params.id - ID do jogo a ser atualizado
- * @param {Object} req.body - Dados a serem atualizados
- * @param {Object} res - Objeto de resposta Express
- * @returns {Promise<void>} Retorna o jogo atualizado ou erro 400
- */
 exports.update = async (req, res) => {
   try {
-    console.log(`[PUT /api/games/${req.params.id}] Atualizando jogo: ${JSON.stringify(req.body)}`);
     const game = await gameService.updateGame(req.params.id, req.body);
-    console.log(`[PUT /api/games/${req.params.id}] ✓ Jogo atualizado: ${game.title}`);
-    res.json(game);
+    return res.json(new GameDTO(game));
   } catch (error) {
-    console.error(`[PUT /api/games/${req.params.id}] ✗ Erro: ${error.message}`);
-    res.status(400).json(formatError(error));
+    return res.status(400).json({ error: error.message });
   }
 };
 
-/**
- * Remove um jogo do sistema
- * @async
- * @function delete
- * @param {Object} req - Objeto de requisição Express
- * @param {Object} req.params - Parâmetros da URL
- * @param {string} req.params.id - ID do jogo a ser removido
- * @param {Object} res - Objeto de resposta Express
- * @returns {Promise<void>} Retorna mensagem de sucesso ou erro 404
- */
 exports.delete = async (req, res) => {
   try {
-    console.log(`[DELETE /api/games/${req.params.id}] Removendo jogo...`);
     const result = await gameService.deleteGame(req.params.id);
-    console.log(`[DELETE /api/games/${req.params.id}] ✓ Jogo removido com sucesso`);
-    res.json(result);
+    return res.json(result);
   } catch (error) {
-    console.error(`[DELETE /api/games/${req.params.id}] ✗ Erro: ${error.message}`);
-    res.status(404).json(formatError(error));
+    return res.status(400).json({ error: error.message });
   }
 };
