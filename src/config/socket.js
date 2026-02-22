@@ -11,7 +11,6 @@ const gameService = require('../services/gameService');
 
 /**
  * Inicializa o servidor Socket.IO com autenticacao JWT e eventos de jogo.
- * Segue o padrao do professor: io.on('connection', socket => { ... })
  * @param {http.Server} server - Instancia do servidor HTTP
  * @returns {Server} Instancia do Socket.IO
  */
@@ -25,8 +24,9 @@ function initSocket(server) {
 
   /**
    * Middleware de autenticacao do Socket.IO.
-   * Valida o token JWT enviado via handshake.auth (similar ao exemplo do professor
-   * que usa socket.handshake.auth.userName).
+   * Valida o token JWT enviado via handshake.auth.token.
+   * Se o token for valido, decodifica e anexa as informacoes do usuario ao socket.
+   * Caso contrario, rejeita a conexao com um erro de autenticacao.
    */
   io.use((socket, next) => {
     const token = socket.handshake.auth.token;
@@ -278,7 +278,6 @@ function initSocket(server) {
     /**
      * Evento: chat_message
      * Permite comunicacao entre jogadores de um mesmo jogo via chat.
-     * Similar ao exemplo do professor com socket.on('chat message', ...).
      */
     socket.on('chat_message', (data) => {
       const { game_id, message } = data;
