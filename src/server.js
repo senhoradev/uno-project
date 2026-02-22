@@ -19,7 +19,7 @@ Game.hasMany(GamePlayer, { foreignKey: 'gameId' });
 
 const app_PORT = process.env.APP_PORT || 3000;
 
-// Criar servidor HTTP a partir do Express (padrao do professor para Socket.IO)
+// Criar servidor HTTP a partir do Express
 const server = createServer(app);
 
 // Inicializar Socket.IO no servidor HTTP
