@@ -402,61 +402,95 @@ class GameService {
   }
 
   /**
-   * Cria um baralho de UNO padrão
-   * @returns {string[]} Array de strings representando as cartas
+   * Cria um baralho completo de UNO (Restaurado)
+   * @returns {string[]} Array contendo as cartas do baralho
    */
   createUnoDeck() {
     const deck = [];
-    ['Red', 'Blue', 'Green', 'Yellow'].forEach(c => {
-      for (let i = 0; i <= 9; i++) deck.push(`${c} ${i}`);
+    const colors = ['Red', 'Blue', 'Green', 'Yellow'];
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const actions = ['Skip', 'Reverse', 'Draw Two'];
+
+    colors.forEach(color => {
+      deck.push(`${color} 0`);
+      numbers.slice(1).forEach(number => {
+        deck.push(`${color} ${number}`);
+        deck.push(`${color} ${number}`);
+      });
+      actions.forEach(action => {
+        deck.push(`${color} ${action}`);
+        deck.push(`${color} ${action}`);
+      });
     });
+
+    for (let i = 0; i < 4; i++) {
+      deck.push('Wild');
+      deck.push('Wild Draw Four');
+    }
+
     return deck;
   }
 
   /**
    * Embaralha um array (Algoritmo Fisher-Yates)
-   * @param {Array} array - Array a ser embaralhado
-   * @returns {Array} Array embaralhado
+   * @param {Array} array - O array a ser embaralhado
+   * @returns {Array} O array embaralhado
    */
   shuffleDeck(array) {
-    for (let i = array.length - 1; i > 0; i--) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return array;
+    return shuffled;
   }
-
+  
   /**
    * Distribui cartas recursivamente
    * @param {string[]} players - Lista de nomes dos jogadores
-   * @param {number} cards - Número de cartas por jogador
-   * @param {string[]} deck - Baralho disponível
-   * @param {Object} [hands={}] - Acumulador de mãos (uso interno)
+   * @param {number} cards - Número total de cartas a distribuir por jogador
+   * @param {string[]} deck - O baralho atual
+   * @param {Object} [hands={}] - Objeto acumulador das mãos (uso interno da recursão)
    * @param {number} [pIdx=0] - Índice do jogador atual (uso interno)
-   * @param {number} [round=0] - Rodada atual (uso interno)
-   * @returns {Object} Mapa de mãos dos jogadores
+   * @param {number} [round=0] - Rodada atual de distribuição (uso interno)
+   * @returns {Object} Mapa com as mãos dos jogadores (chave: nome, valor: array de cartas)
    */
   dealCardsRecursive(players, cards, deck, hands = {}, pIdx = 0, round = 0) {
     if (round >= cards) return hands;
     const p = players[pIdx];
     if (!hands[p]) hands[p] = [];
-    hands[p].push(deck.pop());
+    if (deck.length > 0) {
+        hands[p].push(deck.pop());
+    }
     const nextP = (pIdx + 1) % players.length;
-    return this.dealCardsRecursive(players, cards, deck, hands, nextP, nextP === 0 ? round + 1 : round);
+    const nextRound = nextP === 0 ? round + 1 : round;
+    return this.dealCardsRecursive(players, cards, deck, hands, nextP, nextRound);
   }
 
   /**
    * Encontra cartas válidas recursivamente (Generator)
    * @param {string[]} hand - Mão do jogador
-   * @param {string} topCard - Carta do topo da pilha
+   * @param {string} topCard - Carta do topo da pilha de descarte
    * @param {string} currentColor - Cor atual do jogo
-   * @param {number} [index=0] - Índice atual (uso interno)
-   * @yields {string} Carta válida
+   * @param {number} [index=0] - Índice atual da iteração na mão (uso interno)
+   * @yields {string} A próxima carta válida encontrada na mão
    */
   *findValidCardsRecursive(hand, topCard, currentColor, index = 0) {
     if (index >= hand.length) return;
+    
     const card = hand[index];
-    if (card.includes(topCard.split(' ')[0])) yield card;
+    const topParts = topCard.split(' ');
+    const cardParts = card.split(' ');
+
+    // Lógica simplificada de validade (cor ou valor/ação igual, ou Wild)
+    const isWild = cardParts[0] === 'Wild';
+    const sameColor = cardParts[0] === (currentColor || topParts[0]);
+    const sameValue = cardParts[1] && cardParts[1] === topParts[1];
+
+    if (isWild || sameColor || sameValue) {
+        yield card;
+    }
+    
     yield* this.findValidCardsRecursive(hand, topCard, currentColor, index + 1);
   }
 }
