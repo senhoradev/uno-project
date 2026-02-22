@@ -188,3 +188,218 @@ exports.delete = async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 };
+
+/**
+ * Distribui cartas aos jogadores usando recursão
+ * @route POST /api/games/deal-cards
+ * @body {number} game_id - ID do jogo
+ * @body {number} [cardsPerPlayer=7] - Número de cartas por jogador
+ */
+exports.dealCards = async (req, res) => {
+  try {
+    const { game_id, cardsPerPlayer = 7 } = req.body;
+    
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+
+    const result = await gameService.dealCards(game_id, cardsPerPlayer);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Joga uma carta seguindo as regras do UNO
+ * @route PUT /api/games/play-card
+ * @body {number} game_id - ID do jogo
+ * @body {string} player - Nome do jogador
+ * @body {string} cardPlayed - Carta a ser jogada
+ * @body {string} [chosenColor] - Cor escolhida (obrigatório para cartas Wild)
+ */
+exports.playCard = async (req, res) => {
+  try {
+    const { game_id, player, cardPlayed, chosenColor } = req.body;
+    
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    
+    if (!player) {
+      return res.status(400).json({ error: 'player é obrigatório' });
+    }
+    
+    if (!cardPlayed) {
+      return res.status(400).json({ error: 'cardPlayed é obrigatório' });
+    }
+
+    const result = await gameService.playCard(game_id, player, cardPlayed, chosenColor);
+    return res.status(200).json(result);
+  } catch (error) {
+    // Se for erro de validação de carta, retorna 400
+    if (error.message.includes('Invalid card')) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Obtém as cartas válidas que um jogador pode jogar (usando recursão/generator)
+ * @route POST /api/games/valid-cards
+ * @body {number} game_id - ID do jogo
+ * @body {string} player - Nome do jogador
+ */
+exports.getValidCards = async (req, res) => {
+  try {
+    const { game_id, player } = req.body;
+    
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    
+    if (!player) {
+      return res.status(400).json({ error: 'player é obrigatório' });
+    }
+
+    const Game = require('../models/game');
+    const GamePlayer = require('../models/gamePlayer');
+    const Player = require('../models/player');
+    
+    const game = await Game.findByPk(game_id);
+    if (!game) {
+      return res.status(404).json({ error: 'Jogo não encontrado' });
+    }
+
+    const gamePlayers = await GamePlayer.findAll({
+      where: { gameId: game_id },
+      include: [{
+        model: Player,
+        attributes: ['username']
+      }]
+    });
+
+    const gamePlayer = gamePlayers.find(gp => gp.Player && gp.Player.username === player);
+    if (!gamePlayer) {
+      return res.status(404).json({ error: 'Jogador não encontrado neste jogo' });
+    }
+
+    const playerHand = gamePlayer.hand || [];
+    const discardPile = game.discardPile || [];
+    const topCard = discardPile[discardPile.length - 1];
+
+    if (!topCard) {
+      return res.status(400).json({ error: 'Não há carta na pilha de descarte' });
+    }
+
+    // Usa o generator recursivo para encontrar cartas válidas
+    const validCards = [];
+    const generator = gameService.findValidCardsRecursive(playerHand, topCard, game.currentColor);
+    
+    for (const card of generator) {
+      validCards.push(card);
+    }
+
+    return res.json({
+      player: player,
+      topCard: topCard,
+      currentColor: game.currentColor,
+      validCards: validCards,
+      totalValidCards: validCards.length
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Compra uma carta do baralho quando não pode jogar
+ * @route PUT /api/games/draw-card
+ * @body {number} game_id - ID do jogo
+ * @body {string} player - Nome do jogador
+ */
+exports.drawCard = async (req, res) => {
+  try {
+    const { game_id, player } = req.body;
+    
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    
+    if (!player) {
+      return res.status(400).json({ error: 'player é obrigatório' });
+    }
+
+    const result = await gameService.drawCard(game_id, player);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Jogador diz "UNO" quando tem 1 carta
+ * @route PATCH /api/games/say-uno
+ * @body {number} game_id - ID do jogo
+ * @body {string} player - Nome do jogador
+ * @body {string} action - Deve ser "Say UNO"
+ */
+exports.sayUno = async (req, res) => {
+  try {
+    const { game_id, player, action } = req.body;
+    
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    
+    if (!player) {
+      return res.status(400).json({ error: 'player é obrigatório' });
+    }
+    
+    if (action && action !== 'Say UNO') {
+      return res.status(400).json({ error: 'action deve ser "Say UNO"' });
+    }
+
+    const result = await gameService.sayUno(game_id, player);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Desafia um jogador que não disse UNO
+ * @route POST /api/games/challenge-uno
+ * @body {number} game_id - ID do jogo
+ * @body {string} challenger - Nome do desafiante
+ * @body {string} challengedPlayer - Nome do jogador desafiado
+ */
+exports.challengeUno = async (req, res) => {
+  try {
+    const { game_id, challenger, challengedPlayer } = req.body;
+    
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    
+    if (!challenger) {
+      return res.status(400).json({ error: 'challenger é obrigatório' });
+    }
+    
+    if (!challengedPlayer) {
+      return res.status(400).json({ error: 'challengedPlayer é obrigatório' });
+    }
+
+    const result = await gameService.challengeUno(game_id, challenger, challengedPlayer);
+    
+    // Se o desafio falhou, retorna 400
+    if (result.status === 'failed') {
+      return res.status(400).json(result);
+    }
+    
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
