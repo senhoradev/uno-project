@@ -2,8 +2,11 @@
  * @fileoverview Controller para gerenciamento de jogos
  * @module controllers/gameController
  */
-
+const Game = require('../models/Game');
+const GamePlayer = require('../models/gamePlayer');
+const Player = require('../models/player');
 const gameService = require('../services/gameService');
+const GameResponseDTO = require('../DTO/Response/GameRespondeDTO');
 
 
 exports.create = async (req, res) => {
@@ -141,15 +144,30 @@ exports.getTopCard = async (req, res) => {
 
 /**
  * Obtém as pontuações atuais de todos os jogadores
+ * @route POST /api/games/scores
  */
 exports.getScores = async (req, res) => {
   try {
     const { game_id } = req.body;
-    const scores = await gameService.getScores(game_id);
-    return res.json({
-      game_id,
-      scores
-    });
+
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+
+    const result = await gameService.getScores(game_id);
+
+    if (result.isSuccess) {
+      const formattedResponse = GameResponseDTO.scoresResponse(
+        result.value.gameId, 
+        result.value.scores
+      );
+
+      return res.status(200).json({
+        scores: formattedResponse.scores
+      });
+    }
+
+    return res.status(404).json({ error: result.error });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
@@ -263,9 +281,6 @@ exports.getValidCards = async (req, res) => {
       return res.status(400).json({ error: 'player é obrigatório' });
     }
 
-    const Game = require('../models/game');
-    const GamePlayer = require('../models/gamePlayer');
-    const Player = require('../models/player');
     
     const game = await Game.findByPk(game_id);
     if (!game) {

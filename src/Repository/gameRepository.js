@@ -1,4 +1,6 @@
 const Game = require('../models/Game');
+const GamePlayer = require('../models/gamePlayer');
+const Player = require('../models/player');
 
 class GameRepository {
 
@@ -57,6 +59,22 @@ class GameRepository {
         });
 
         return deletedRows > 0;
+    }
+
+    /**
+     * Busca as pontuações atuais de todos os jogadores em um jogo específico.
+     * @param {number} gameId 
+     * @returns {Promise<GamePlayer[]>}
+     */
+    async getGameScores(gameId) {
+        return await GamePlayer.findAll({
+            where: { gameId },
+            include: [{ 
+                model: Player, 
+                attributes: ['name'] // Garante o acesso ao nome para o DTO
+            }],
+            attributes: ['score'] // Recupera a pontuação atual do jogador na partida
+        });
     }
 }
 
