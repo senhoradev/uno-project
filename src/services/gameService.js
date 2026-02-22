@@ -16,6 +16,9 @@ const Result = require('../utils/Result');
 class GameService {
   /**
    * Cria um novo jogo e adiciona o criador automaticamente como primeiro jogador
+   * @param {Object} data - Dados do jogo (nome, regras, maxPlayers)
+   * @param {number} creatorId - ID do usuário criador
+   * @returns {Promise<Game>} O objeto do jogo criado
    */
   async createGame(data, creatorId) {
     const game = await Game.create({
@@ -37,6 +40,10 @@ class GameService {
 
   /**
    * Permite que um usuário entre em um jogo existente
+   * @param {number} gameId - ID do jogo
+   * @param {number} playerId - ID do jogador
+   * @returns {Promise<boolean>} Retorna true se sucesso
+   * @throws {Error} Se jogo não estiver esperando, estiver cheio ou usuário já estiver nele
    */
   async joinGame(gameId, playerId) {
     const game = await this.getGameById(gameId);
@@ -69,6 +76,10 @@ class GameService {
 
   /**
    * Alterna o status de "pronto" de um jogador no jogo
+   * @param {number} gameId - ID do jogo
+   * @param {number} playerId - ID do jogador
+   * @returns {Promise<Object>} Objeto com novo status e mensagem
+   * @throws {Error} Se jogo já iniciou ou usuário não está no jogo
    */
   async toggleReady(gameId, playerId) {
     const game = await this.getGameById(gameId);
@@ -96,6 +107,10 @@ class GameService {
 
   /**
    * Permite que um usuário abandone um jogo
+   * @param {number} gameId - ID do jogo
+   * @param {number} playerId - ID do jogador
+   * @returns {Promise<boolean>} Retorna true se sucesso
+   * @throws {Error} Se jogo não estiver em andamento ou usuário não estiver nele
    */
   async leaveGame(gameId, playerId) {
     const game = await this.getGameById(gameId);
@@ -124,6 +139,10 @@ class GameService {
 
   /**
    * Finaliza um jogo
+   * @param {number} gameId - ID do jogo
+   * @param {number} userId - ID do usuário solicitante (deve ser o criador)
+   * @returns {Promise<boolean>} Retorna true se sucesso
+   * @throws {Error} Se usuário não for criador ou jogo não estiver em andamento
    */
   async endGame(gameId, userId) {
     const game = await this.getGameById(gameId);
@@ -142,6 +161,8 @@ class GameService {
 
   /**
    * Obtém o estado atual do jogo
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<Object>} Objeto com ID e status do jogo
    */
   async getGameState(gameId) {
     const game = await this.getGameById(gameId);
@@ -153,6 +174,8 @@ class GameService {
 
   /**
    * Obtém a lista de jogadores no jogo
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<Object>} Objeto com ID do jogo e lista de nomes de jogadores
    */
   async getGamePlayers(gameId) {
     const game = await this.getGameById(gameId);
@@ -167,6 +190,10 @@ class GameService {
 
   /**
    * Inicia o jogo
+   * @param {number} gameId - ID do jogo
+   * @param {number} userId - ID do usuário solicitante (deve ser o criador)
+   * @returns {Promise<boolean>} Retorna true se sucesso
+   * @throws {Error} Se não for criador, menos de 2 jogadores ou nem todos prontos
    */
   async startGame(gameId, userId) {
     const game = await this.getGameById(gameId);
@@ -194,6 +221,9 @@ class GameService {
 
   /**
    * Busca um jogo pelo seu ID
+   * @param {number} id - ID do jogo
+   * @returns {Promise<Game>} Instância do jogo
+   * @throws {Error} Se jogo não for encontrado
    */
   async getGameById(id) {
     const game = await Game.findByPk(id);
@@ -203,6 +233,10 @@ class GameService {
 
   /**
    * Atualiza os dados de um jogo
+   * @param {number} id - ID do jogo
+   * @param {Object} data - Dados para atualização
+   * @returns {Promise<Game>} Jogo atualizado
+   * @throws {Error} Se tentar reduzir maxPlayers abaixo do número atual de jogadores
    */
   async updateGame(id, data) {
     const game = await this.getGameById(id);
@@ -217,6 +251,8 @@ class GameService {
 
   /**
    * Remove um jogo
+   * @param {number} id - ID do jogo
+   * @returns {Promise<Object>} Mensagem de sucesso
    */
   async deleteGame(id) {
     const game = await this.getGameById(id);
@@ -227,39 +263,44 @@ class GameService {
   /**
    * Obtém as pontuações atuais
    * Corrigido para usar Result.success e Result.failure
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<Result>} Result com pontuações ou erro
    */
   async getScores(gameId) {
-  try {
-    const game = await Game.findByPk(gameId);
-    if (!game) {
-      return Result.failure('Jogo não encontrado');
+    try {
+      const game = await Game.findByPk(gameId);
+      if (!game) {
+        return Result.failure('Jogo não encontrado');
+      }
+
+      // Busca no repositório que inclui o Player e o atributo score
+      const gamePlayers = await gameRepository.getGameScores(gameId);
+
+      if (!gamePlayers || gamePlayers.length === 0) {
+        return Result.failure('Nenhum jogador encontrado neste jogo.');
+      }
+
+      const scoresMap = {};
+      gamePlayers.forEach(gp => {
+        // Pega o nome do Player vindo do include e a pontuação real do GamePlayer
+        const playerName = gp.Player ? gp.Player.name : `Player${gp.playerId}`;
+        scoresMap[playerName] = gp.score !== undefined ? gp.score : 0;
+      });
+
+      return Result.success({
+        gameId: gameId,
+        scores: scoresMap
+      });
+    } catch (error) {
+      return Result.failure('Erro ao processar pontuações: ' + error.message);
     }
-
-    // Busca no repositório que inclui o Player e o atributo score
-    const gamePlayers = await gameRepository.getGameScores(gameId);
-
-    if (!gamePlayers || gamePlayers.length === 0) {
-      return Result.failure('Nenhum jogador encontrado neste jogo.');
-    }
-
-    const scoresMap = {};
-    gamePlayers.forEach(gp => {
-      // Pega o nome do Player vindo do include e a pontuação real do GamePlayer
-      const playerName = gp.Player ? gp.Player.name : `Player${gp.playerId}`;
-      scoresMap[playerName] = gp.score !== undefined ? gp.score : 0;
-    });
-
-    return Result.success({
-      gameId: gameId,
-      scores: scoresMap
-    });
-  } catch (error) {
-    return Result.failure('Erro ao processar pontuações: ' + error.message);
   }
-}
 
   /**
    * Obtém o jogador atual
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<string>} Nome do usuário do jogador atual
+   * @throws {Error} Se não houver jogador atual
    */
   async getCurrentPlayer(gameId) {
     const gamePlayer = await GamePlayer.findOne({
@@ -272,6 +313,9 @@ class GameService {
 
   /**
    * Obtém a carta do topo
+   * @param {number} gameId - ID do jogo
+   * @returns {Promise<string>} String representando a carta
+   * @throws {Error} Se pilha estiver vazia
    */
   async getTopCard(gameId) {
     const game = await this.getGameById(gameId);
@@ -282,6 +326,10 @@ class GameService {
 
   /**
    * Distribui cartas (Recursivo)
+   * @param {number} gameId - ID do jogo
+   * @param {number} [cardsPerPlayer=7] - Número de cartas por jogador
+   * @returns {Promise<Object>} Resultado da distribuição
+   * @throws {Error} Se não houver jogadores
    */
   async dealCards(gameId, cardsPerPlayer = 7) {
     const game = await this.getGameById(gameId);
@@ -310,6 +358,12 @@ class GameService {
 
   /**
    * Executa a jogada de uma carta
+   * @param {number} gameId - ID do jogo
+   * @param {string} playerUsername - Nome do usuário que está jogando
+   * @param {string} cardPlayed - Carta sendo jogada
+   * @param {string} [chosenColor] - Cor escolhida (para cartas curinga)
+   * @returns {Promise<Object>} Resultado da jogada
+   * @throws {Error} Vários erros de validação de regra de negócio
    */
   async playCard(gameId, playerUsername, cardPlayed, chosenColor = null) {
     const game = await this.getGameById(gameId);
@@ -347,7 +401,10 @@ class GameService {
     return { message: 'Card played successfully.', nextPlayer: gamePlayers[nextIndex].Player.username };
   }
 
-  // Métodos Auxiliares
+  /**
+   * Cria um baralho de UNO padrão
+   * @returns {string[]} Array de strings representando as cartas
+   */
   createUnoDeck() {
     const deck = [];
     ['Red', 'Blue', 'Green', 'Yellow'].forEach(c => {
@@ -356,6 +413,11 @@ class GameService {
     return deck;
   }
 
+  /**
+   * Embaralha um array (Algoritmo Fisher-Yates)
+   * @param {Array} array - Array a ser embaralhado
+   * @returns {Array} Array embaralhado
+   */
   shuffleDeck(array) {
     for (let i = array.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -364,6 +426,16 @@ class GameService {
     return array;
   }
 
+  /**
+   * Distribui cartas recursivamente
+   * @param {string[]} players - Lista de nomes dos jogadores
+   * @param {number} cards - Número de cartas por jogador
+   * @param {string[]} deck - Baralho disponível
+   * @param {Object} [hands={}] - Acumulador de mãos (uso interno)
+   * @param {number} [pIdx=0] - Índice do jogador atual (uso interno)
+   * @param {number} [round=0] - Rodada atual (uso interno)
+   * @returns {Object} Mapa de mãos dos jogadores
+   */
   dealCardsRecursive(players, cards, deck, hands = {}, pIdx = 0, round = 0) {
     if (round >= cards) return hands;
     const p = players[pIdx];
@@ -373,6 +445,14 @@ class GameService {
     return this.dealCardsRecursive(players, cards, deck, hands, nextP, nextP === 0 ? round + 1 : round);
   }
 
+  /**
+   * Encontra cartas válidas recursivamente (Generator)
+   * @param {string[]} hand - Mão do jogador
+   * @param {string} topCard - Carta do topo da pilha
+   * @param {string} currentColor - Cor atual do jogo
+   * @param {number} [index=0] - Índice atual (uso interno)
+   * @yields {string} Carta válida
+   */
   *findValidCardsRecursive(hand, topCard, currentColor, index = 0) {
     if (index >= hand.length) return;
     const card = hand[index];

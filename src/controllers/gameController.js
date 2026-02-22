@@ -9,6 +9,12 @@ const gameService = require('../services/gameService');
 const GameResponseDTO = require('../DTO/Response/GameRespondeDTO');
 
 
+/**
+ * Cria um novo jogo
+ * @param {Object} req - Objeto de requisição do Express
+ * @param {Object} res - Objeto de resposta do Express
+ * @returns {Promise<Object>} Resposta JSON com ID do jogo criado ou erro
+ */
 exports.create = async (req, res) => {
   try {
     const game = await gameService.createGame(req.body, req.user.id);
@@ -21,6 +27,12 @@ exports.create = async (req, res) => {
   }
 };
 
+/**
+ * Permite que um jogador entre em um jogo existente
+ * @param {Object} req - Objeto de requisição contendo game_id no corpo
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Mensagem de sucesso ou erro
+ */
 exports.join = async (req, res) => {
   try {
     const { game_id } = req.body;
@@ -33,6 +45,9 @@ exports.join = async (req, res) => {
 
 /**
  * Alterna o status de "pronto" do jogador no jogo
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Novo status de prontidão e mensagem
  */
 exports.toggleReady = async (req, res) => {
   try {
@@ -48,6 +63,12 @@ exports.toggleReady = async (req, res) => {
 };
 
 
+/**
+ * Inicia o jogo (apenas o criador pode iniciar)
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Mensagem de sucesso ou erro
+ */
 exports.start = async (req, res) => {
   try {
     const { game_id } = req.body;
@@ -60,6 +81,9 @@ exports.start = async (req, res) => {
 
 /**
  * Abandona um jogo em progresso
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Mensagem de sucesso ou erro
  */
 exports.leave = async (req, res) => {
   try {
@@ -73,6 +97,9 @@ exports.leave = async (req, res) => {
 
 /**
  * Finaliza um jogo 
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Mensagem de sucesso ou erro
  */
 exports.end = async (req, res) => {
   try {
@@ -86,6 +113,9 @@ exports.end = async (req, res) => {
 
 /**
  * Obtém o estado atual do jogo 
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Objeto com o estado do jogo
  */
 exports.getState = async (req, res) => {
   try {
@@ -99,6 +129,9 @@ exports.getState = async (req, res) => {
 
 /**
  * Obtém a lista de jogadores no jogo 
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Lista de jogadores
  */
 exports.getPlayers = async (req, res) => {
   try {
@@ -112,6 +145,9 @@ exports.getPlayers = async (req, res) => {
 
 /**
  * Obtém o jogador atual que deve jogar uma carta
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Nome do jogador atual
  */
 exports.getCurrentPlayer = async (req, res) => {
   try {
@@ -128,6 +164,9 @@ exports.getCurrentPlayer = async (req, res) => {
 
 /**
  * Obtém a carta do topo da pilha de descarte
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Carta do topo
  */
 exports.getTopCard = async (req, res) => {
   try {
@@ -144,7 +183,8 @@ exports.getTopCard = async (req, res) => {
 
 /**
  * Obtém as pontuações atuais de todos os jogadores
- * @route POST /api/games/scores
+ * @param {Object} req - Objeto de requisição contendo game_id
+ * @param {Object} res - Objeto de resposta
  */
 exports.getScores = async (req, res) => {
   try {
@@ -173,6 +213,12 @@ exports.getScores = async (req, res) => {
   }
 };
 
+/**
+ * Busca um jogo pelo ID
+ * @param {Object} req - Objeto de requisição com ID nos parâmetros
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Detalhes do jogo
+ */
 exports.getById = async (req, res) => {
   try {
     const game = await gameService.getGameById(req.params.id);
@@ -189,6 +235,12 @@ exports.getById = async (req, res) => {
   }
 };
 
+/**
+ * Atualiza as configurações de um jogo
+ * @param {Object} req - Objeto de requisição com ID nos parâmetros e dados no corpo
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Jogo atualizado
+ */
 exports.update = async (req, res) => {
   try {
     const game = await gameService.updateGame(req.params.id, req.body);
@@ -198,6 +250,12 @@ exports.update = async (req, res) => {
   }
 };
 
+/**
+ * Remove um jogo do sistema
+ * @param {Object} req - Objeto de requisição com ID nos parâmetros
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Mensagem de sucesso
+ */
 exports.delete = async (req, res) => {
   try {
     const result = await gameService.deleteGame(req.params.id);
@@ -209,9 +267,10 @@ exports.delete = async (req, res) => {
 
 /**
  * Distribui cartas aos jogadores usando recursão
- * @route POST /api/games/deal-cards
- * @body {number} game_id - ID do jogo
- * @body {number} [cardsPerPlayer=7] - Número de cartas por jogador
+ * @param {Object} req - Objeto de requisição
+ * @param {number} req.body.game_id - ID do jogo
+ * @param {number} [req.body.cardsPerPlayer=7] - Número de cartas por jogador
+ * @param {Object} res - Objeto de resposta
  */
 exports.dealCards = async (req, res) => {
   try {
@@ -230,11 +289,12 @@ exports.dealCards = async (req, res) => {
 
 /**
  * Joga uma carta seguindo as regras do UNO
- * @route PUT /api/games/play-card
- * @body {number} game_id - ID do jogo
- * @body {string} player - Nome do jogador
- * @body {string} cardPlayed - Carta a ser jogada
- * @body {string} [chosenColor] - Cor escolhida (obrigatório para cartas Wild)
+ * @param {Object} req - Objeto de requisição
+ * @param {number} req.body.game_id - ID do jogo
+ * @param {string} req.body.player - Nome do jogador
+ * @param {string} req.body.cardPlayed - Carta a ser jogada
+ * @param {string} [req.body.chosenColor] - Cor escolhida (obrigatório para cartas Wild)
+ * @param {Object} res - Objeto de resposta
  */
 exports.playCard = async (req, res) => {
   try {
@@ -265,9 +325,10 @@ exports.playCard = async (req, res) => {
 
 /**
  * Obtém as cartas válidas que um jogador pode jogar (usando recursão/generator)
- * @route POST /api/games/valid-cards
- * @body {number} game_id - ID do jogo
- * @body {string} player - Nome do jogador
+ * @param {Object} req - Objeto de requisição
+ * @param {number} req.body.game_id - ID do jogo
+ * @param {string} req.body.player - Nome do jogador
+ * @param {Object} res - Objeto de resposta
  */
 exports.getValidCards = async (req, res) => {
   try {
