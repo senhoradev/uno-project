@@ -29,7 +29,10 @@ function initSocket(server) {
    * Caso contrario, rejeita a conexao com um erro de autenticacao.
    */
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
+    const token =
+    socket.handshake.auth.token ||
+    socket.handshake.query.token;
+
     if (!token) {
       return next(new Error('Token de autenticacao necessario'));
     }
