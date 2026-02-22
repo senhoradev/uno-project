@@ -30,7 +30,7 @@ app.set('io', io);
 
 // Primeiro cria o banco se não existir, depois sincroniza e inicia o servidor
 createDatabaseIfNotExists()
-  .then(() => sequelize.sync()) // Use { alter: true } apenas se precisar alterar a estrutura
+  .then(() => sequelize.sync({ alter: true })) // Use { alter: true } apenas se precisar alterar a estrutura
   .then(async () => {
     console.log('Banco de dados conectado e sincronizado.');
     
