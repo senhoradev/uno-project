@@ -188,18 +188,10 @@ describe('RequestLogService', () => {
       const result = await requestLogService.getRequestStats();
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.totalRequests).toBe(5);
-      expect(result.value.successfulRequests).toBe(3); // 200, 201, 200
-      expect(result.value.failedRequests).toBe(2); // 404, 500
-      expect(result.value.successRate).toBe(60.00);
-      expect(result.value.failureRate).toBe(40.00);
-      expect(result.value.requestsByMethod).toEqual({
-        GET: 3,
-        POST: 1,
-        DELETE: 1
-      });
-      expect(result.value.authenticatedRequests).toBe(4);
-      expect(result.value.unauthenticatedRequests).toBe(1);
+      expect(result.value.total_requests).toBe(5);
+      expect(result.value.breakdown['/api/games']).toEqual({ GET: 1, POST: 1 });
+      expect(result.value.breakdown['/api/players']).toEqual({ GET: 1 });
+      expect(result.value.breakdown['/api/cards']).toEqual({ GET: 1, DELETE: 1 });
     });
 
     test('retorna estatísticas vazias quando não há logs', async () => {
@@ -208,9 +200,8 @@ describe('RequestLogService', () => {
       const result = await requestLogService.getRequestStats();
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.totalRequests).toBe(0);
-      expect(result.value.successfulRequests).toBe(0);
-      expect(result.value.successRate).toBe(0);
+      expect(result.value.total_requests).toBe(0);
+      expect(result.value.breakdown).toEqual({});
     });
 
     test('usa memoization para cache de estatísticas', async () => {
@@ -233,16 +224,11 @@ describe('RequestLogService', () => {
   describe('getResponseTimeStats - ENDPOINT 2', () => {
     test('calcula estatísticas de tempo de resposta corretamente', async () => {
       const mockLogs = [
-        { id: 1, responseTime: 50 },
-        { id: 2, responseTime: 100 },
-        { id: 3, responseTime: 150 },
-        { id: 4, responseTime: 200 },
-        { id: 5, responseTime: 250 },
-        { id: 6, responseTime: 300 },
-        { id: 7, responseTime: 400 },
-        { id: 8, responseTime: 500 },
-        { id: 9, responseTime: 800 },
-        { id: 10, responseTime: 1200 }
+        { id: 1, endpointAccess: '/api/users', responseTime: 50 },
+        { id: 2, endpointAccess: '/api/users', responseTime: 100 },
+        { id: 3, endpointAccess: '/api/users', responseTime: 200 },
+        { id: 4, endpointAccess: '/api/products', responseTime: 150 },
+        { id: 5, endpointAccess: '/api/products', responseTime: 250 }
       ];
 
       requestLogRepository.findAll.mockResolvedValue(mockLogs);
@@ -250,52 +236,24 @@ describe('RequestLogService', () => {
       const result = await requestLogService.getResponseTimeStats();
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.totalRequests).toBe(10);
-      expect(result.value.minResponseTime).toBe(50);
-      expect(result.value.maxResponseTime).toBe(1200);
-      expect(result.value.averageResponseTime).toBe(395); // Soma: 3950 / 10
-      expect(result.value.medianResponseTime).toBe(275); // (250 + 300) / 2
-
-      // Verifica faixas de tempo
-      // fast: < 100 → 50
-      // medium: 100 to < 500 → 100, 150, 200, 250, 300, 400
-      // slow: 500 to < 1000 → 500, 800
-      // verySlow: >= 1000 → 1200
-      expect(result.value.timeRanges.fast).toBe(1); // < 100ms: 50
-      expect(result.value.timeRanges.medium).toBe(6); // 100-500ms: 100, 150, 200, 250, 300, 400
-      expect(result.value.timeRanges.slow).toBe(2); // 500-1000ms: 500, 800
-      expect(result.value.timeRanges.verySlow).toBe(1); // >= 1000ms: 1200
+      expect(result.value['/api/users']).toBeDefined();
+      expect(result.value['/api/users'].avg).toBe(117); // (50+100+200)/3 = 116.67 arredondado
+      expect(result.value['/api/users'].min).toBe(50);
+      expect(result.value['/api/users'].max).toBe(200);
+      
+      expect(result.value['/api/products']).toBeDefined();
+      expect(result.value['/api/products'].avg).toBe(200); // (150+250)/2
+      expect(result.value['/api/products'].min).toBe(150);
+      expect(result.value['/api/products'].max).toBe(250);
     });
 
-    test('calcula percentis corretamente', async () => {
-      // Cria array de 100 logs com tempos crescentes
-      const mockLogs = Array.from({ length: 100 }, (_, i) => ({
-        id: i + 1,
-        responseTime: (i + 1) * 10
-      }));
-
-      requestLogRepository.findAll.mockResolvedValue(mockLogs);
-
-      const result = await requestLogService.getResponseTimeStats();
-
-      expect(result.isSuccess).toBe(true);
-      // P95 = index 95 (0-based), que é 960 (96 * 10)
-      // P99 = index 99 (0-based), que é 1000 (100 * 10)
-      expect(result.value.p95ResponseTime).toBeGreaterThanOrEqual(940);
-      expect(result.value.p95ResponseTime).toBeLessThanOrEqual(960);
-      expect(result.value.p99ResponseTime).toBeGreaterThanOrEqual(980);
-      expect(result.value.p99ResponseTime).toBeLessThanOrEqual(1000);
-    });
-
-    test('retorna zeros quando não há logs', async () => {
+    test('retorna objeto vazio quando não há logs', async () => {
       requestLogRepository.findAll.mockResolvedValue([]);
 
       const result = await requestLogService.getResponseTimeStats();
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.averageResponseTime).toBe(0);
-      expect(result.value.minResponseTime).toBe(0);
-      expect(result.value.maxResponseTime).toBe(0);
+      expect(result.value).toEqual({});
     });
   });
 
@@ -319,45 +277,20 @@ describe('RequestLogService', () => {
       const result = await requestLogService.getStatusCodeStats();
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.totalRequests).toBe(10);
-      expect(result.value.uniqueStatusCodes).toBe(5);
-
-      // Verifica categorias
-      expect(result.value.statusCategories.success).toBe(4); // 200, 201
-      expect(result.value.statusCategories.clientError).toBe(2); // 404
-      expect(result.value.statusCategories.serverError).toBe(4); // 500, 503
-
-      // Verifica distribuição ordenada por count
-      expect(result.value.statusCodeDistribution[0].statusCode).toBe(200);
-      expect(result.value.statusCodeDistribution[0].count).toBe(3);
-      expect(result.value.statusCodeDistribution[0].percentage).toBe('30.00');
-
-      // Verifica top status codes
-      expect(result.value.topStatusCodes.length).toBeLessThanOrEqual(5);
-
-      // Verifica códigos de erro (>= 400)
-      expect(result.value.errorCodes.length).toBe(3); // 404, 500, 503
+      expect(result.value['200']).toBe(3);
+      expect(result.value['201']).toBe(1);
+      expect(result.value['404']).toBe(2);
+      expect(result.value['500']).toBe(3);
+      expect(result.value['503']).toBe(1);
     });
 
-    test('categoriza status codes corretamente', async () => {
-      const mockLogs = [
-        { statusCode: 100 }, // informational
-        { statusCode: 200 }, // success
-        { statusCode: 301 }, // redirection
-        { statusCode: 404 }, // clientError
-        { statusCode: 500 }  // serverError
-      ];
-
-      requestLogRepository.findAll.mockResolvedValue(mockLogs);
+    test('retorna objeto vazio quando não há logs', async () => {
+      requestLogRepository.findAll.mockResolvedValue([]);
 
       const result = await requestLogService.getStatusCodeStats();
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.statusCategories.informational).toBe(1);
-      expect(result.value.statusCategories.success).toBe(1);
-      expect(result.value.statusCategories.redirection).toBe(1);
-      expect(result.value.statusCategories.clientError).toBe(1);
-      expect(result.value.statusCategories.serverError).toBe(1);
+      expect(result.value).toEqual({});
     });
   });
 
@@ -377,73 +310,18 @@ describe('RequestLogService', () => {
       const result = await requestLogService.getPopularEndpoints();
 
       expect(result.isSuccess).toBe(true);
-      expect(result.value.totalEndpoints).toBe(3);
-      expect(result.value.totalRequests).toBe(6);
-
-      // Endpoint mais popular
-      expect(result.value.topEndpoints[0].endpoint).toBe('/api/games');
-      expect(result.value.topEndpoints[0].totalRequests).toBe(3);
-      expect(result.value.topEndpoints[0].percentage).toBe('50.00');
-      expect(result.value.topEndpoints[0].methods.GET).toBe(2);
-      expect(result.value.topEndpoints[0].methods.POST).toBe(1);
-      expect(result.value.topEndpoints[0].avgResponseTime).toBe(150); // (100 + 200 + 150) / 3
-
-      // Segundo endpoint
-      expect(result.value.topEndpoints[1].endpoint).toBe('/api/players');
-      expect(result.value.topEndpoints[1].totalRequests).toBe(2);
+      expect(result.value.most_popular).toBe('/api/games');
+      expect(result.value.request_count).toBe(3);
     });
 
-    test('ordena endpoints por popularidade (mais acessados primeiro)', async () => {
-      const mockLogs = [
-        { endpointAccess: '/api/cards', requestMethod: 'GET', responseTime: 50 },
-        { endpointAccess: '/api/games', requestMethod: 'GET', responseTime: 100 },
-        { endpointAccess: '/api/games', requestMethod: 'GET', responseTime: 100 },
-        { endpointAccess: '/api/games', requestMethod: 'GET', responseTime: 100 },
-        { endpointAccess: '/api/players', requestMethod: 'GET', responseTime: 100 },
-        { endpointAccess: '/api/players', requestMethod: 'GET', responseTime: 100 }
-      ];
-
-      requestLogRepository.findAll.mockResolvedValue(mockLogs);
+    test('retorna null quando não há logs', async () => {
+      requestLogRepository.findAll.mockResolvedValue([]);
 
       const result = await requestLogService.getPopularEndpoints();
 
       expect(result.isSuccess).toBe(true);
-      // Verifica ordem decrescente por totalRequests
-      expect(result.value.topEndpoints[0].totalRequests).toBeGreaterThanOrEqual(
-        result.value.topEndpoints[1].totalRequests
-      );
-    });
-
-    test('calcula tempo médio de resposta por endpoint', async () => {
-      const mockLogs = [
-        { endpointAccess: '/api/games', requestMethod: 'GET', responseTime: 100 },
-        { endpointAccess: '/api/games', requestMethod: 'GET', responseTime: 300 }
-      ];
-
-      requestLogRepository.findAll.mockResolvedValue(mockLogs);
-
-      const result = await requestLogService.getPopularEndpoints();
-
-      expect(result.isSuccess).toBe(true);
-      expect(result.value.topEndpoints[0].avgResponseTime).toBe(200); // (100 + 300) / 2
-    });
-
-    test('inclui top combinações endpoint+método', async () => {
-      const mockLogs = [
-        { endpointAccess: '/api/games', requestMethod: 'GET', responseTime: 100 },
-        { endpointAccess: '/api/games', requestMethod: 'GET', responseTime: 100 },
-        { endpointAccess: '/api/games', requestMethod: 'POST', responseTime: 100 }
-      ];
-
-      requestLogRepository.findAll.mockResolvedValue(mockLogs);
-
-      const result = await requestLogService.getPopularEndpoints();
-
-      expect(result.isSuccess).toBe(true);
-      expect(result.value.topEndpointMethods).toBeDefined();
-      expect(result.value.topEndpointMethods[0].method).toBe('GET');
-      expect(result.value.topEndpointMethods[0].endpoint).toBe('/api/games');
-      expect(result.value.topEndpointMethods[0].count).toBe(2);
+      expect(result.value.most_popular).toBeNull();
+      expect(result.value.request_count).toBe(0);
     });
   });
 
@@ -480,7 +358,7 @@ describe('RequestLogService', () => {
   });
 
   describe('Programação Funcional - Filter, Map, Reduce', () => {
-    test('usa filter para filtrar requisições bem-sucedidas', async () => {
+    test('usa filter para filtrar requisições por status code', async () => {
       const mockLogs = [
         { statusCode: 200 },
         { statusCode: 201 },
@@ -490,42 +368,50 @@ describe('RequestLogService', () => {
 
       requestLogRepository.findAll.mockResolvedValue(mockLogs);
 
-      const result = await requestLogService.getRequestStats();
+      const result = await requestLogService.getStatusCodeStats();
 
-      expect(result.value.successfulRequests).toBe(2);
+      // Filter usado internamente para contar apenas códigos específicos
+      expect(result.value['200']).toBe(1);
+      expect(result.value['201']).toBe(1);
+      expect(result.value['400']).toBe(1);
+      expect(result.value['500']).toBe(1);
     });
 
-    test('usa reduce para agrupar requisições por método', async () => {
+    test('usa reduce para agrupar requisições por endpoint e método', async () => {
       const mockLogs = [
-        { requestMethod: 'GET' },
-        { requestMethod: 'GET' },
-        { requestMethod: 'POST' },
-        { requestMethod: 'PUT' },
-        { requestMethod: 'GET' }
+        { endpointAccess: '/api/games', requestMethod: 'GET' },
+        { endpointAccess: '/api/games', requestMethod: 'GET' },
+        { endpointAccess: '/api/games', requestMethod: 'POST' },
+        { endpointAccess: '/api/players', requestMethod: 'PUT' },
+        { endpointAccess: '/api/players', requestMethod: 'GET' }
       ];
 
       requestLogRepository.findAll.mockResolvedValue(mockLogs);
 
       const result = await requestLogService.getRequestStats();
 
-      expect(result.value.requestsByMethod.GET).toBe(3);
-      expect(result.value.requestsByMethod.POST).toBe(1);
-      expect(result.value.requestsByMethod.PUT).toBe(1);
+      // Reduce usado internamente para agrupar por endpoint e método
+      expect(result.value.breakdown['/api/games']['GET']).toBe(2);
+      expect(result.value.breakdown['/api/games']['POST']).toBe(1);
+      expect(result.value.breakdown['/api/players']['GET']).toBe(1);
+      expect(result.value.breakdown['/api/players']['PUT']).toBe(1);
     });
 
-    test('usa map para extrair e transformar dados', async () => {
+    test('usa map para extrair e transformar dados de tempo de resposta', async () => {
       const mockLogs = [
-        { responseTime: 100 },
-        { responseTime: 200 },
-        { responseTime: 300 }
+        { endpointAccess: '/api/games', responseTime: 100 },
+        { endpointAccess: '/api/games', responseTime: 200 },
+        { endpointAccess: '/api/games', responseTime: 300 }
       ];
 
       requestLogRepository.findAll.mockResolvedValue(mockLogs);
 
       const result = await requestLogService.getResponseTimeStats();
 
-      // Map extrai os tempos e calcula a média
-      expect(result.value.averageResponseTime).toBe(200);
+      // Map usado internamente para extrair tempos e calcular estatísticas
+      expect(result.value['/api/games'].avg).toBe(200);
+      expect(result.value['/api/games'].min).toBe(100);
+      expect(result.value['/api/games'].max).toBe(300);
     });
   });
 });

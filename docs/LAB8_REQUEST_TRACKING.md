@@ -480,4 +480,6 @@ Debora
 
 Implementado para Lab 8 - Atividade 1 - JALA University 2026
 
+Árvore de arquivos Gerado por Manus IA
+
 ---

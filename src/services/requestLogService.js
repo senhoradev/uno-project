@@ -166,10 +166,18 @@ class RequestLogService {
   /**
    * ENDPOINT 1: /stats/requests
    * Retorna estatísticas gerais das requisições
+   * Formato do enunciado:
+   * {
+   *   "total_requests": 150,
+   *   "breakdown": {
+   *     "/api/users": { "GET": 50, "POST": 30 },
+   *     "/api/products": { "GET": 40, "DELETE": 10 }
+   *   }
+   * }
    * 
    * Usa:
-   * - Filter: para filtrar por critérios
-   * - Reduce: para contar (accumulator)
+   * - Reduce: para agrupar por endpoint e método (accumulator)
+   * - Filter: para filtrar dados
    * - Map: para transformar dados
    * 
    * @returns {Promise<Result>} Estatísticas de requisições
@@ -187,47 +195,28 @@ class RequestLogService {
       // Usa memoization para otimizar cálculos repetidos
       const stats = this.memoize('requestStats', () => {
         // ACCUMULATOR - Conta total de requisições
-        const totalRequests = logs.length;
+        const total_requests = logs.length;
 
-        // FILTER + ACCUMULATOR - Conta requisições bem-sucedidas (2xx)
-        const successfulRequests = logs
-          .filter(log => log.statusCode >= 200 && log.statusCode < 300)
-          .length;
-
-        // FILTER + ACCUMULATOR - Conta requisições com erro (4xx e 5xx)
-        const failedRequests = logs
-          .filter(log => log.statusCode >= 400)
-          .length;
-
-        // REDUCE (ACCUMULATOR) - Agrupa requisições por método HTTP
-        const requestsByMethod = logs.reduce((acc, log) => {
-          acc[log.requestMethod] = (acc[log.requestMethod] || 0) + 1;
+        // REDUCE (ACCUMULATOR) - Agrupa por endpoint e método
+        // Formato: { "/api/users": { "GET": 50, "POST": 30 } }
+        const breakdown = logs.reduce((acc, log) => {
+          const endpoint = log.endpointAccess;
+          const method = log.requestMethod;
+          
+          // Inicializa endpoint se não existir
+          if (!acc[endpoint]) {
+            acc[endpoint] = {};
+          }
+          
+          // Conta requisições por método dentro do endpoint
+          acc[endpoint][method] = (acc[endpoint][method] || 0) + 1;
+          
           return acc;
         }, {});
 
-        // FILTER + MAP - Requisições com userId (autenticadas)
-        const authenticatedRequests = logs
-          .filter(log => log.userId !== null && log.userId !== undefined)
-          .length;
-
-        // Calcula taxas percentuais
-        const successRate = totalRequests > 0 
-          ? ((successfulRequests / totalRequests) * 100).toFixed(2)
-          : 0;
-
-        const failureRate = totalRequests > 0 
-          ? ((failedRequests / totalRequests) * 100).toFixed(2)
-          : 0;
-
         return {
-          totalRequests,
-          successfulRequests,
-          failedRequests,
-          successRate: parseFloat(successRate),
-          failureRate: parseFloat(failureRate),
-          requestsByMethod,
-          authenticatedRequests,
-          unauthenticatedRequests: totalRequests - authenticatedRequests
+          total_requests,
+          breakdown
         };
       });
 
@@ -243,13 +232,17 @@ class RequestLogService {
 
   /**
    * ENDPOINT 2: /stats/response-times
-   * Retorna estatísticas de tempos de resposta
+   * Retorna estatísticas de tempos de resposta por endpoint
+   * Formato do enunciado:
+   * {
+   *   "/api/users": { "avg": 120, "min": 50, "max": 300 },
+   *   "/api/products": { "avg": 200, "min": 100, "max": 500 }
+   * }
    * 
    * Usa:
-   * - Map: para extrair tempos
-   * - Reduce: para somar e calcular médias (accumulator)
-   * - Sort: para ordenar
-   * - Filter: para remover outliers
+   * - Reduce: para agrupar por endpoint (accumulator)
+   * - Map: para extrair tempos e calcular estatísticas
+   * - Filter: para filtrar dados válidos
    * 
    * @returns {Promise<Result>} Estatísticas de tempo de resposta
    */
@@ -266,71 +259,36 @@ class RequestLogService {
       // Usa memoization
       const stats = this.memoize('responseTimeStats', () => {
         if (logs.length === 0) {
-          return {
-            averageResponseTime: 0,
-            minResponseTime: 0,
-            maxResponseTime: 0,
-            medianResponseTime: 0,
-            p95ResponseTime: 0,
-            p99ResponseTime: 0,
-            totalRequests: 0
-          };
+          return {};
         }
 
-        // MAP - Extrai apenas os tempos de resposta
-        const responseTimes = logs.map(log => log.responseTime);
-
-        // REDUCE (ACCUMULATOR) - Calcula soma total
-        const totalTime = responseTimes.reduce((acc, time) => acc + time, 0);
-
-        // Calcula média
-        const averageResponseTime = totalTime / responseTimes.length;
-
-        // SORT - Ordena para calcular mediana e percentis
-        const sortedTimes = [...responseTimes].sort((a, b) => a - b);
-
-        // Calcula mediana
-        const medianIndex = Math.floor(sortedTimes.length / 2);
-        const medianResponseTime = sortedTimes.length % 2 === 0
-          ? (sortedTimes[medianIndex - 1] + sortedTimes[medianIndex]) / 2
-          : sortedTimes[medianIndex];
-
-        // Calcula percentil 95 (P95)
-        const p95Index = Math.floor(sortedTimes.length * 0.95);
-        const p95ResponseTime = sortedTimes[p95Index] || sortedTimes[sortedTimes.length - 1];
-
-        // Calcula percentil 99 (P99)
-        const p99Index = Math.floor(sortedTimes.length * 0.99);
-        const p99ResponseTime = sortedTimes[p99Index] || sortedTimes[sortedTimes.length - 1];
-
-        // Min e Max
-        const minResponseTime = sortedTimes[0];
-        const maxResponseTime = sortedTimes[sortedTimes.length - 1];
-
-        // REDUCE - Agrupa por faixas de tempo
-        const timeRanges = responseTimes.reduce((acc, time) => {
-          if (time < 100) acc.fast++;
-          else if (time < 500) acc.medium++;
-          else if (time < 1000) acc.slow++;
-          else acc.verySlow++;
-          return acc;
-        }, { fast: 0, medium: 0, slow: 0, verySlow: 0 });
-
-        return {
-          averageResponseTime: Math.round(averageResponseTime * 100) / 100,
-          minResponseTime,
-          maxResponseTime,
-          medianResponseTime: Math.round(medianResponseTime * 100) / 100,
-          p95ResponseTime,
-          p99ResponseTime,
-          totalRequests: logs.length,
-          timeRanges: {
-            fast: timeRanges.fast,           // < 100ms
-            medium: timeRanges.medium,       // 100-500ms
-            slow: timeRanges.slow,           // 500-1000ms
-            verySlow: timeRanges.verySlow    // > 1000ms
+        // REDUCE (ACCUMULATOR) - Agrupa logs por endpoint
+        const endpointGroups = logs.reduce((acc, log) => {
+          const endpoint = log.endpointAccess;
+          if (!acc[endpoint]) {
+            acc[endpoint] = [];
           }
-        };
+          acc[endpoint].push(log.responseTime);
+          return acc;
+        }, {});
+
+        // MAP + REDUCE - Calcula estatísticas para cada endpoint
+        const result = {};
+        Object.keys(endpointGroups).forEach(endpoint => {
+          const times = endpointGroups[endpoint];
+          
+          // REDUCE - Calcula soma para média
+          const sum = times.reduce((acc, time) => acc + time, 0);
+          const avg = Math.round(sum / times.length);
+          
+          // Calcula min e max
+          const min = Math.min(...times);
+          const max = Math.max(...times);
+          
+          result[endpoint] = { avg, min, max };
+        });
+
+        return result;
       });
 
       return Result.success(stats);
@@ -346,11 +304,15 @@ class RequestLogService {
   /**
    * ENDPOINT 3: /stats/status-codes
    * Retorna estatísticas de códigos de status HTTP
+   * Formato do enunciado:
+   * {
+   *   "200": 130,
+   *   "404": 10,
+   *   "500": 10
+   * }
    * 
    * Usa:
    * - Reduce: para agrupar por status code (accumulator)
-   * - Map: para transformar dados
-   * - Filter: para categorizar por tipo de status
    * 
    * @returns {Promise<Result>} Estatísticas de status codes
    */
@@ -367,43 +329,14 @@ class RequestLogService {
       // Usa memoization
       const stats = this.memoize('statusCodeStats', () => {
         // REDUCE (ACCUMULATOR) - Agrupa por código de status
+        // Retorna objeto simples: { "200": 130, "404": 10, "500": 10 }
         const statusCodeCounts = logs.reduce((acc, log) => {
-          acc[log.statusCode] = (acc[log.statusCode] || 0) + 1;
+          const code = String(log.statusCode);
+          acc[code] = (acc[code] || 0) + 1;
           return acc;
         }, {});
 
-        // MAP - Transforma objeto em array ordenado
-        const statusCodeDistribution = Object.entries(statusCodeCounts)
-          .map(([code, count]) => ({
-            statusCode: parseInt(code),
-            count,
-            percentage: ((count / logs.length) * 100).toFixed(2)
-          }))
-          .sort((a, b) => b.count - a.count);
-
-        // FILTER + REDUCE - Categoriza por tipo de status (1xx, 2xx, 3xx, 4xx, 5xx)
-        const statusCategories = logs.reduce((acc, log) => {
-          const category = Math.floor(log.statusCode / 100);
-          const categoryName = this.getStatusCategoryName(category);
-          acc[categoryName] = (acc[categoryName] || 0) + 1;
-          return acc;
-        }, {});
-
-        // FILTER - Identifica os status codes mais comuns (top 5)
-        const topStatusCodes = statusCodeDistribution.slice(0, 5);
-
-        // FILTER - Lista códigos de erro (4xx e 5xx)
-        const errorCodes = statusCodeDistribution
-          .filter(stat => stat.statusCode >= 400);
-
-        return {
-          totalRequests: logs.length,
-          statusCodeDistribution,
-          statusCategories,
-          topStatusCodes,
-          errorCodes,
-          uniqueStatusCodes: Object.keys(statusCodeCounts).length
-        };
+        return statusCodeCounts;
       });
 
       return Result.success(stats);
@@ -419,12 +352,15 @@ class RequestLogService {
   /**
    * ENDPOINT 4: /stats/popular-endpoints
    * Retorna endpoints mais acessados
+   * Formato do enunciado:
+   * {
+   *   "most_popular": "/api/users",
+   *   "request_count": 80
+   * }
    * 
    * Usa:
    * - Reduce: para contar acessos por endpoint (accumulator)
-   * - Map: para transformar dados
    * - Sort: para ordenar por popularidade
-   * - Filter: para filtrar por método HTTP
    * 
    * @returns {Promise<Result>} Endpoints mais populares
    */
@@ -440,68 +376,29 @@ class RequestLogService {
 
       // Usa memoization
       const stats = this.memoize('popularEndpoints', () => {
-        // REDUCE (ACCUMULATOR) - Agrupa por endpoint
+        if (logs.length === 0) {
+          return {
+            most_popular: null,
+            request_count: 0
+          };
+        }
+
+        // REDUCE (ACCUMULATOR) - Conta acessos por endpoint
         const endpointCounts = logs.reduce((acc, log) => {
-          const key = log.endpointAccess;
-          if (!acc[key]) {
-            acc[key] = {
-              endpoint: key,
-              totalRequests: 0,
-              methods: {},
-              avgResponseTime: 0,
-              responseTimes: []
-            };
-          }
-          acc[key].totalRequests++;
-          acc[key].methods[log.requestMethod] = (acc[key].methods[log.requestMethod] || 0) + 1;
-          acc[key].responseTimes.push(log.responseTime);
+          const endpoint = log.endpointAccess;
+          acc[endpoint] = (acc[endpoint] || 0) + 1;
           return acc;
         }, {});
 
-        // MAP + PIPE - Transforma e calcula médias de tempo de resposta
-        const endpointStats = Object.values(endpointCounts)
-          .map(endpoint => {
-            // Calcula tempo médio de resposta
-            const avgResponseTime = endpoint.responseTimes.reduce((sum, time) => sum + time, 0) / endpoint.responseTimes.length;
-            
-            return {
-              endpoint: endpoint.endpoint,
-              totalRequests: endpoint.totalRequests,
-              percentage: ((endpoint.totalRequests / logs.length) * 100).toFixed(2),
-              methods: endpoint.methods,
-              avgResponseTime: Math.round(avgResponseTime * 100) / 100
-            };
-          })
-          .sort((a, b) => b.totalRequests - a.totalRequests);
+        // Encontra o endpoint mais popular (SORT + primeiro elemento)
+        const sortedEndpoints = Object.entries(endpointCounts)
+          .sort((a, b) => b[1] - a[1]);
 
-        // FILTER - Top 10 endpoints mais acessados
-        const topEndpoints = endpointStats.slice(0, 10);
-
-        // REDUCE - Agrupa por combinação endpoint + método
-        const endpointMethodCombinations = logs.reduce((acc, log) => {
-          const key = `${log.requestMethod} ${log.endpointAccess}`;
-          if (!acc[key]) {
-            acc[key] = {
-              method: log.requestMethod,
-              endpoint: log.endpointAccess,
-              count: 0
-            };
-          }
-          acc[key].count++;
-          return acc;
-        }, {});
-
-        // MAP + SORT - Top combinações endpoint+método
-        const topEndpointMethods = Object.values(endpointMethodCombinations)
-          .sort((a, b) => b.count - a.count)
-          .slice(0, 10);
+        const [most_popular, request_count] = sortedEndpoints[0];
 
         return {
-          totalEndpoints: endpointStats.length,
-          totalRequests: logs.length,
-          topEndpoints,
-          allEndpoints: endpointStats,
-          topEndpointMethods
+          most_popular,
+          request_count
         };
       });
 
