@@ -1,4 +1,20 @@
+/**
+ * @fileoverview DTO para padronizar as respostas relacionadas à entidade Game
+ * @module DTO/Response/GameResponseDTO
+ */
 class GameResponseDTO {
+    /**
+     * Cria uma instância de GameResponseDTO
+     * @param {Object} data - Dados do jogo
+     * @param {number} data.id - ID do jogo
+     * @param {string} data.name - Nome do jogo
+     * @param {string} data.status - Status atual (waiting, started, finished)
+     * @param {number} data.maxPlayers - Número máximo de jogadores
+     * @param {number} data.creatorId - ID do criador
+     * @param {Date} data.createdAt - Data de criação
+     * @param {Date} data.updatedAt - Data de atualização
+     * @param {Array} [data.players] - Lista de jogadores associados
+     */
     constructor({ id, name, status, maxPlayers, creatorId, createdAt, updatedAt, players }) {
         this.id = id;
         this.name = name;
@@ -18,6 +34,11 @@ class GameResponseDTO {
         }
     }
 
+    /**
+     * Converte um modelo Sequelize Game em um DTO
+     * @param {Object} game - Instância do modelo Game
+     * @returns {GameResponseDTO} DTO formatado
+     */
     static fromModel(game) {
         return new GameResponseDTO({
             id: game.id,
@@ -31,10 +52,21 @@ class GameResponseDTO {
         });
     }
 
+    /**
+     * Converte uma lista de modelos Game em uma lista de DTOs
+     * @param {Array<Object>} games - Lista de instâncias do modelo Game
+     * @returns {Array<GameResponseDTO>} Lista de DTOs
+     */
     static fromModelList(games) {
         return games.map(game => GameResponseDTO.fromModel(game));
     }
 
+    /**
+     * Formata a resposta para o jogador atual
+     * @param {number} gameId - ID do jogo
+     * @param {string} currentPlayer - Nome do jogador atual
+     * @returns {Object} Objeto formatado com game_id e current_player
+     */
     static currentPlayerResponse(gameId, currentPlayer) {
         return {
             game_id: gameId,
@@ -42,6 +74,12 @@ class GameResponseDTO {
         };
     }
 
+    /**
+     * Formata a resposta para a carta do topo
+     * @param {number} gameId - ID do jogo
+     * @param {string} topCard - Carta do topo
+     * @returns {Object} Objeto formatado com game_id e top_card
+     */
     static topCardResponse(gameId, topCard) {
         return {
             game_id: gameId,
@@ -49,6 +87,12 @@ class GameResponseDTO {
         };
     }
 
+    /**
+     * Formata a resposta para as pontuações
+     * @param {number} gameId - ID do jogo
+     * @param {Object} scores - Mapa de pontuações
+     * @returns {Object} Objeto formatado com game_id e scores
+     */
     static scoresResponse(gameId, scores) {
         return {
             game_id: gameId,

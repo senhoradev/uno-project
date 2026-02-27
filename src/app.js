@@ -6,6 +6,9 @@
 
 const express = require('express');
 
+// Importação dos middlewares
+const requestTracking = require('./middlewares/requestTracking');
+
 // Importação das rotas da aplicação
 const signUpRoutes = require('./routes/signUpRoutes');
 const loginRoutes = require('./routes/loginRoutes');
@@ -13,6 +16,7 @@ const playerRoutes = require('./routes/playerRoutes');
 const cardRoutes = require('./routes/cardRoutes');
 const scoringHistoryRoutes = require('./routes/scoringHistoryRoutes');
 const gameRoutes = require('./routes/gameRoutes');
+const requestLogRoutes = require('./routes/requestLogRoutes');
 
 /**
  * Instância da aplicação Express.
@@ -23,6 +27,10 @@ const app = express();
 // Middleware
 // Habilita o parsing de JSON no corpo das requisições para facilitar o tratamento de dados
 app.use(express.json());
+
+// Middleware de rastreamento de requisições
+// Captura métricas de todas as requisições (endpoint, método, status, tempo de resposta)
+app.use(requestTracking);
 
 // Definição de Rotas
 // Rota para registro de novos usuários
@@ -37,6 +45,8 @@ app.use('/api/cards', cardRoutes);
 app.use('/api/scoring-history', scoringHistoryRoutes);
 // Rota para gerenciamento de partidas/jogos
 app.use('/api/games', gameRoutes);
+// Rota para estatísticas de requisições
+app.use('/api/stats', requestLogRoutes);
 
 // Middleware de tratamento de erros global
 app.use((err, req, res, next) => {

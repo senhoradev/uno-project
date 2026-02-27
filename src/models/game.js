@@ -99,6 +99,35 @@ const Game = sequelize.define('Game', {
       isInt: { msg: "O ID do criador deve ser um número inteiro." },
       notNull: { msg: "O ID do criador é obrigatório." }
     }
+  },
+  /**
+   * Pilha de descarte - armazena as cartas jogadas
+   * @type {Array}
+   */
+  discardPile: {
+    type: DataTypes.JSON,
+    defaultValue: [],
+    allowNull: false,
+    comment: "Armazena as cartas na pilha de descarte"
+  },
+  /**
+   * Cor atual do jogo (importante para cartas Wild)
+   * @type {string}
+   */
+  currentColor: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    comment: "Cor atual após cartas Wild serem jogadas"
+  },
+  /**
+   * Baralho restante (cartas não distribuídas)
+   * @type {Array}
+   */
+  deck: {
+    type: DataTypes.JSON,
+    defaultValue: [],
+    allowNull: false,
+    comment: "Armazena as cartas restantes no baralho para compra"
   }
 });
 
