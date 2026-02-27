@@ -32,6 +32,12 @@ const GamePlayer = sequelize.define('GamePlayer', {
   score: {
     type: DataTypes.INTEGER,
     defaultValue: 0
+  },
+  hand: {
+    type: DataTypes.JSON,
+    defaultValue: [],
+    allowNull: false,
+    comment: "Armazena as cartas na mão do jogador"
   }
 });
 

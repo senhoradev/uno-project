@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teste Socket UNO</title>
+</head>
+<body>
+
+<h2>Teste Socket UNO</h2>
+
+<input id="token" placeholder="Cole o token aqui" style="width:400px">
+<button onclick="connect()">Conectar</button>
+<br><br>
+
+<button onclick="joinGame()">Join Game</button>
+<button onclick="ready()">Ready</button>
+<button onclick="start()">Start</button>
+<br><br>
+
+<input id="msg" placeholder="Mensagem">
+<button onclick="sendMessage()">Enviar Chat</button>
+
+<pre id="log"></pre>
+
+<script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+
+<script>
+let socket;
+
+function log(data) {
+  document.getElementById("log").innerText += "\n" + JSON.stringify(data, null, 2);
+}
+
+function connect() {
+  const token = document.getElementById("token").value;
+
+  socket = io("http://localhost:3000", {
+    auth: { token }
+  });
+
+  socket.on("connect", () => log("Conectado!"));
+
+  socket.on("player_joined", data => log(data));
+  socket.on("player_ready", data => log(data));
+  socket.on("game_started", data => log(data));
+  socket.on("chat_message", data => log(data));
+  socket.on("error", data => log(data));
+}
+
+function joinGame() {
+  socket.emit("join", { game_id: 1 });
+}
+
+function ready() {
+  socket.emit("ready", { game_id: 1 });
+}
+
+function start() {
+  socket.emit("start", { game_id: 1 });
+}
+
+function sendMessage() {
+  const message = document.getElementById("msg").value;
+  socket.emit("chat_message", {
+    game_id: 1,
+    message
+  });
+}
+</script>
+
+</body>
+</html>
