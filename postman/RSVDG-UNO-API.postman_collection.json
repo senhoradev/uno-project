@@ -1,0 +1,1586 @@
+{
+  "info": {
+    "_postman_id": "rsvdg-uno-api",
+    "name": "RSVDG - UNO API",
+    "description": "Collection completa da API do projeto UNO",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "SignUp",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"safira\",\n  \"email\": \"safira@email.com\",\n  \"password\": \"121418\",\n  \"name\": \"Safira\",\n  \"age\": 22\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{signup}}",
+              "host": ["{{url}}{{signup}}"]
+            },
+            "description": "Registra um novo usuário no sistema"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                "var jsonData = pm.response.json();",
+                "if (jsonData.access_token) {",
+                "    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+                "    ",
+                "    var template = `",
+                "    <html>",
+                "    <head>",
+                "        <style>",
+                "            body { font-family: Arial, sans-serif; padding: 20px; background: #1e1e1e; color: #fff; }",
+                "            .container { background: #2d2d2d; padding: 20px; border-radius: 8px; }",
+                "            h3 { color: #4CAF50; margin-bottom: 15px; }",
+                "            .label { color: #888; margin-bottom: 5px; }",
+                "            .token-box { background: #1e1e1e; padding: 15px; border-radius: 4px; word-break: break-all; margin-bottom: 15px; border: 1px solid #444; font-family: monospace; user-select: all; cursor: text; }",
+                "            .copy-btn { background: #4CAF50; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-size: 14px; }",
+                "            .copy-btn:hover { background: #45a049; }",
+                "            .copied { background: #2196F3 !important; }",
+                "            .hidden-input { position: absolute; left: -9999px; }",
+                "        </style>",
+                "    </head>",
+                "    <body>",
+                "        <div class='container'>",
+                "            <h3>Login realizado com sucesso!</h3>",
+                "            <div class='token-box' id='tokenText' onclick='selectToken()'>{{token}}</div>",
+                "            <input type='text' id='hiddenInput' class='hidden-input' value='{{token}}' />",
+                "            <button class='copy-btn' onclick='copyToken()'>Copiar Token</button>",
+                "            <span id='status' style='margin-left: 10px; color: #4CAF50;'></span>",
+                "        </div>",
+                "        <script>",
+                "            function selectToken() {",
+                "                var range = document.createRange();",
+                "                range.selectNodeContents(document.getElementById('tokenText'));",
+                "                var sel = window.getSelection();",
+                "                sel.removeAllRanges();",
+                "                sel.addRange(range);",
+                "            }",
+                "            function copyToken() {",
+                "                var input = document.getElementById('hiddenInput');",
+                "                input.select();",
+                "                input.setSelectionRange(0, 99999);",
+                "                document.execCommand('copy');",
+                "                document.getElementById('status').textContent = 'Copiado!';",
+                "                setTimeout(function() {",
+                "                    document.getElementById('status').textContent = '';",
+                "                }, 2000);",
+                "            }",
+                "        </script>",
+                "    </body>",
+                "    </html>",
+                "    `;",
+                "    ",
+                "    pm.visualizer.set(template, { token: jsonData.access_token });",
+                "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"safira\",\n  \"password\": \"121418\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{login}}",
+              "host": ["{{url}}{{login}}"]
+            },
+            "description": "Autentica o usuário e retorna um token JWT"
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{logout}}",
+              "host": ["{{url}}{{logout}}"]
+            },
+            "description": "Encerra a sessão do usuário"
+          },
+          "response": []
+        },
+        {
+          "name": "Profile",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{profile}}",
+              "host": ["{{url}}{{profile}}"]
+            },
+            "description": "Retorna os dados do usuário autenticado"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/games",
+      "item": [
+        {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            },
+            "description": "Lista todos os jogos"
+          },
+          "response": []
+        },
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            },
+            "description": "Busca um jogo pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Partida UNO #1\",\n  \"maxPlayers\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            },
+            "description": "Cria um novo jogo. O criador entra automaticamente."
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Partida UNO Atualizada\",\n  \"status\": \"in_progress\",\n  \"maxPlayers\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            },
+            "description": "Atualiza um jogo existente. Status válidos: waiting, in_progress, finished, cancelled"
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            },
+            "description": "Remove um jogo pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "joinGame",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{joingame}}",
+              "host": ["{{url}}{{joingame}}"]
+            },
+            "description": "Entra em um jogo existente"
+          },
+          "response": []
+        },
+        {
+          "name": "toggleReady",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/ready",
+              "host": ["{{url}}{{games}}/ready"]
+            },
+            "description": "Alterna o status de pronto do jogador. Se estava pronto, fica nao pronto e vice-versa."
+          },
+          "response": []
+        },
+        {
+          "name": "startGame",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/start",
+              "host": ["{{url}}{{games}}/start"]
+            },
+            "description": "Inicia o jogo. Apenas o criador pode iniciar e todos devem estar prontos."
+          },
+          "response": []
+        },
+        {
+          "name": "getCurrentPlayer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/current-player",
+              "host": ["{{url}}{{games}}/current-player"]
+            },
+            "description": "Obtém o jogador atual que deve realizar a jogada."
+          },
+          "response": []
+        },
+        {
+          "name": "getTopCard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/top-card",
+              "host": ["{{url}}{{games}}/top-card"]
+            },
+            "description": "Retorna a carta que está no topo da pilha de descarte."
+          },
+          "response": []
+        },
+        {
+          "name": "getScores",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/scores",
+              "host": ["{{url}}{{games}}/scores"]
+            },
+            "description": "Obtém as pontuações atuais de todos os participantes do jogo."
+          },
+          "response": []
+        },
+        {
+          "name": "leaveGame",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/leave",
+              "host": ["{{url}}{{games}}/leave"]
+            },
+            "description": "Abandona um jogo em progresso. Verifica se o jogo está em andamento e se o usuário é um jogador."
+          },
+          "response": []
+        },
+        {
+          "name": "endGame",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/end",
+              "host": ["{{url}}{{games}}/end"]
+            },
+            "description": "Finaliza um jogo. Apenas o criador pode encerrar e o jogo deve estar em andamento."
+          },
+          "response": []
+        },
+        {
+          "name": "getGameState",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/state",
+              "host": ["{{url}}{{games}}/state"]
+            },
+            "description": "Obtém o estado atual do jogo (waiting, in_progress, finished, cancelled)."
+          },
+          "response": []
+        },
+        {
+          "name": "getGamePlayers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/players",
+              "host": ["{{url}}{{games}}/players"]
+            },
+            "description": "Obtém a lista de jogadores no jogo."
+          },
+          "response": []
+        },
+        {
+          "name": "dealCards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"cardsPerPlayer\": 7\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/deal-cards",
+              "host": ["{{url}}{{games}}/deal-cards"]
+            },
+            "description": "Distribui cartas aos jogadores usando recursão. Cria o baralho UNO completo (108 cartas), embaralha e distribui 7 cartas por jogador. A primeira carta da pilha de descarte é garantidamente numérica."
+          },
+          "response": []
+        },
+        {
+          "name": "playCard",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Green 7\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": ["{{url}}{{games}}/play-card"]
+            },
+            "description": "Jogar uma carta seguindo as regras do UNO. A carta deve corresponder em cor, valor ou ser Wild. Para cartas Wild, inclua chosenColor no body. Efeitos aplicados automaticamente: Skip (pula proximo), Reverse (inverte direcao), Draw Two (+2 e pula), Wild Draw Four (+4 e pula)."
+          },
+          "response": []
+        },
+        {
+          "name": "playCard (Wild)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Wild\",\n  \"chosenColor\": \"Red\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": ["{{url}}{{games}}/play-card"]
+            },
+            "description": "Jogar uma carta Wild escolhendo a cor. chosenColor obrigatório: Red, Blue, Green ou Yellow."
+          },
+          "response": []
+        },
+        {
+          "name": "playCard (Wild Draw Four)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Wild Draw Four\",\n  \"chosenColor\": \"Blue\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": ["{{url}}{{games}}/play-card"]
+            },
+            "description": "Jogar Wild Draw Four. O proximo jogador compra 4 cartas e perde o turno. chosenColor obrigatório."
+          },
+          "response": []
+        },
+        {
+          "name": "getValidCards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/valid-cards",
+              "host": ["{{url}}{{games}}/valid-cards"]
+            },
+            "description": "Obter cartas válidas que o jogador pode jogar (usa recursão/generator). Retorna a lista de cartas jogáveis com base na carta do topo e cor atual."
+          },
+          "response": []
+        },
+        {
+          "name": "drawCard",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/draw-card",
+              "host": ["{{url}}{{games}}/draw-card"]
+            },
+            "description": "Comprar uma carta do baralho quando não pode jogar. O turno passa automaticamente para o próximo jogador. Se o baralho acabar, a pilha de descarte é reembaralhada."
+          },
+          "response": []
+        },
+        {
+          "name": "sayUno",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"action\": \"Say UNO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/say-uno",
+              "host": ["{{url}}{{games}}/say-uno"]
+            },
+            "description": "Jogador diz UNO quando tem 1 carta restante. Deve ser chamado antes que outro jogador faça um challenge. O campo action deve ser exatamente 'Say UNO'."
+          },
+          "response": []
+        },
+        {
+          "name": "challengeUno",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"challenger\": \"safira\",\n  \"challengedPlayer\": \"grazi_player\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/challenge-uno",
+              "host": ["{{url}}{{games}}/challenge-uno"]
+            },
+            "description": "Desafiar um jogador que não disse UNO. Se o jogador desafiado tem 1 carta e não disse UNO, ele compra 2 cartas de penalidade. Se ele já disse UNO, o desafio falha (retorna 400)."
+          },
+          "response": []
+        },
+        {
+          "name": "executeTurn (play-card)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"action\": \"play-card\",\n  \"card\": \"Blue 5\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/turn",
+              "host": ["{{url}}{{games}}/turn"]
+            },
+            "description": "Ação unificada de turno - jogar carta. Combina validação + jogar + encerrar turno automaticamente. Para Wild, inclua chosenColor."
+          },
+          "response": []
+        },
+        {
+          "name": "executeTurn (draw-card)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"action\": \"draw-card\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/turn",
+              "host": ["{{url}}{{games}}/turn"]
+            },
+            "description": "Ação unificada de turno - comprar carta. Compra uma carta e encerra o turno automaticamente."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/players",
+      "item": [
+        {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            },
+            "description": "Lista todos os jogadores"
+          },
+          "response": []
+        },
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{players}}/1",
+              "host": ["{{url}}{{players}}"],
+              "path": ["1"]
+            },
+            "description": "Busca um jogador pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"grazi_player\",\n  \"email\": \"grazi@email.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Grazi\",\n  \"age\": 25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            },
+            "description": "Cria um novo jogador"
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"grazi_updated\",\n  \"email\": \"grazi.novo@email.com\",\n  \"name\": \"Grazi Atualizada\",\n  \"age\": 26\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}/1",
+              "host": ["{{url}}{{players}}"],
+              "path": ["1"]
+            },
+            "description": "Atualiza um jogador existente"
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{players}}/1",
+              "host": ["{{url}}{{players}}"],
+              "path": ["1"]
+            },
+            "description": "Remove um jogador pelo ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/cards",
+      "item": [
+        {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{cards}}",
+              "host": ["{{url}}{{cards}}"]
+            },
+            "description": "Lista todas as cartas"
+          },
+          "response": []
+        },
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{cards}}/1",
+              "host": ["{{url}}{{cards}}"],
+              "path": ["1"]
+            },
+            "description": "Busca uma carta pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"red\",\n  \"action\": \"draw_two\",\n  \"value\": \"7\",\n  \"type\": \"number\",\n  \"gameId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{cards}}",
+              "host": ["{{url}}{{cards}}"]
+            },
+            "description": "Cria uma nova carta. Cores: red, blue, green, yellow, wild. Tipos: number, skip, reverse, draw_two, wild, wild_draw_four"
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"blue\",\n  \"action\": \"skip\",\n  \"value\": \"skip\",\n  \"type\": \"skip\",\n  \"gameId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{cards}}/1",
+              "host": ["{{url}}{{cards}}"],
+              "path": ["1"]
+            },
+            "description": "Atualiza uma carta existente"
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{cards}}/1",
+              "host": ["{{url}}{{cards}}"],
+              "path": ["1"]
+            },
+            "description": "Remove uma carta pelo ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "/api/scoring-history",
+      "item": [
+        {
+          "name": "getAll",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}",
+              "host": ["{{url}}{{score}}"]
+            },
+            "description": "Lista todo o histórico de pontuações"
+          },
+          "response": []
+        },
+        {
+          "name": "getById",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/1",
+              "host": ["{{url}}{{score}}"],
+              "path": ["1"]
+            },
+            "description": "Busca uma pontuação pelo ID"
+          },
+          "response": []
+        },
+        {
+          "name": "getByPlayerId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/player/1",
+              "host": ["{{url}}{{score}}/player"],
+              "path": ["1"]
+            },
+            "description": "Busca pontuações de um jogador específico"
+          },
+          "response": []
+        },
+        {
+          "name": "getByGameId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/game/1",
+              "host": ["{{url}}{{score}}/game"],
+              "path": ["1"]
+            },
+            "description": "Busca pontuações de um jogo específico"
+          },
+          "response": []
+        },
+        {
+          "name": "post",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": 1,\n  \"gameId\": 1,\n  \"score\": 100,\n  \"position\": 1,\n  \"isWinner\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{score}}",
+              "host": ["{{url}}{{score}}"]
+            },
+            "description": "Registra uma nova pontuação"
+          },
+          "response": []
+        },
+        {
+          "name": "put",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 150,\n  \"position\": 2,\n  \"isWinner\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{score}}/1",
+              "host": ["{{url}}{{score}}"],
+              "path": ["1"]
+            },
+            "description": "Atualiza uma pontuação existente"
+          },
+          "response": []
+        },
+        {
+          "name": "delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{score}}/1",
+              "host": ["{{url}}{{score}}"],
+              "path": ["1"]
+            },
+            "description": "Remove uma pontuação pelo ID"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Testes de Validacao",
+      "item": [
+        {
+          "name": "Game - Titulo Vazio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"\",\n  \"maxPlayers\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            },
+            "description": "Deve retornar erro 400 - título obrigatório"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - Status Invalido",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"status\": \"invalid_status\",\n  \"maxPlayers\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/1",
+              "host": ["{{url}}{{games}}"],
+              "path": ["1"]
+            },
+            "description": "Deve retornar erro 400 - status inválido"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - MaxPlayers maior que 10",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"maxPlayers\": 15\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            },
+            "description": "Deve retornar erro 400 - maxPlayers deve ser entre 2 e 10"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - MaxPlayers menor que 2",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"UNO\",\n  \"maxPlayers\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}",
+              "host": ["{{url}}{{games}}"]
+            },
+            "description": "Deve retornar erro 400 - maxPlayers deve ser entre 2 e 10"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - Not Found",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{url}}{{games}}/9999",
+              "host": ["{{url}}{{games}}"],
+              "path": ["9999"]
+            },
+            "description": "Deve retornar erro 404 - jogo não encontrado"
+          },
+          "response": []
+        },
+        {
+          "name": "Player - Email Invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"test_user\",\n  \"email\": \"email-invalido\",\n  \"password\": \"senha123\",\n  \"name\": \"Teste\",\n  \"age\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            },
+            "description": "Deve retornar erro 400 - email inválido"
+          },
+          "response": []
+        },
+        {
+          "name": "Player - Username Vazio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"\",\n  \"email\": \"teste@email.com\",\n  \"password\": \"senha123\",\n  \"name\": \"Teste\",\n  \"age\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{players}}",
+              "host": ["{{url}}{{players}}"]
+            },
+            "description": "Deve retornar erro 400 - username obrigatório"
+          },
+          "response": []
+        },
+        {
+          "name": "Card - Cor Invalida",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"color\": \"purple\",\n  \"value\": \"5\",\n  \"type\": \"number\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{cards}}",
+              "host": ["{{url}}{{cards}}"]
+            },
+            "description": "Deve retornar erro 400 - cor inválida (válidas: red, blue, green, yellow, wild)"
+          },
+          "response": []
+        },
+        {
+          "name": "Login - Credenciais Invalidas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"usuario_inexistente\",\n  \"password\": \"senha_errada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{login}}",
+              "host": ["{{url}}{{login}}"]
+            },
+            "description": "Deve retornar erro 401 - credenciais inválidas"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - Jogar carta invalida",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Yellow 9\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": ["{{url}}{{games}}/play-card"]
+            },
+            "description": "Deve retornar erro 400 - carta inválida se não bater com cor/valor do topo"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - Wild sem chosenColor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Wild\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": ["{{url}}{{games}}/play-card"]
+            },
+            "description": "Deve retornar erro 400 - chosenColor obrigatório para cartas Wild"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - sayUno action errada",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"action\": \"wrong\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/say-uno",
+              "host": ["{{url}}{{games}}/say-uno"]
+            },
+            "description": "Deve retornar erro 400 - action deve ser 'Say UNO'"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - challengeUno sem campos",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/challenge-uno",
+              "host": ["{{url}}{{games}}/challenge-uno"]
+            },
+            "description": "Deve retornar erro 400 - challenger e challengedPlayer obrigatórios"
+          },
+          "response": []
+        },
+        {
+          "name": "Game - executeTurn action invalida",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"action\": \"invalid-action\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/turn",
+              "host": ["{{url}}{{games}}/turn"]
+            },
+            "description": "Deve retornar erro 400 - action deve ser 'play-card' ou 'draw-card'"
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "url",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "players",
+      "value": "/api/players"
+    },
+    {
+      "key": "games",
+      "value": "/api/games"
+    },
+    {
+      "key": "cards",
+      "value": "/api/cards"
+    },
+    {
+      "key": "score",
+      "value": "/api/scoring-history"
+    },
+    {
+      "key": "signup",
+      "value": "/api/signup"
+    },
+    {
+      "key": "login",
+      "value": "/api/auth/login"
+    },
+    {
+      "key": "logout",
+      "value": "/api/auth/logout"
+    },
+    {
+      "key": "profile",
+      "value": "/api/auth/profile"
+    },
+    {
+      "key": "joingame",
+      "value": "/api/games/join"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
