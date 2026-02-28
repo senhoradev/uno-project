@@ -103,4 +103,83 @@ router.post('/top-card', auth, gameController.getTopCard);
  */
 router.post('/scores', auth, gameController.getScores);
 
+/**
+ * @route POST /api/games/deal-cards
+ * @description Distribuir cartas aos jogadores usando recursão
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @body {number} [cardsPerPlayer=7] - Número de cartas por jogador (padrão: 7)
+ * @returns {Object} 200 - Cartas distribuídas com sucesso
+ * @example
+ * Request body:
+ * {
+ *   "game_id": 1,
+ *   "cardsPerPlayer": 7
+ * }
+ * Response:
+ * {
+ *   "message": "Cards dealt successfully.",
+ *   "players": {
+ *     "Player1": ["Red 3", "Blue Skip", "Green 7", ...],
+ *     "Player2": ["Yellow Reverse", "Red 5", "Blue Draw Two", ...]
+ *   }
+ * }
+ */
+router.post('/deal-cards', auth, gameController.dealCards);
+
+/**
+ * @route PUT /api/games/play-card
+ * @description Jogar uma carta seguindo as regras do UNO
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @body {string} player - Nome do jogador
+ * @body {string} cardPlayed - Carta a ser jogada
+ * @body {string} [chosenColor] - Cor escolhida (obrigatório para cartas Wild: "Red", "Blue", "Green", "Yellow")
+ * @returns {Object} 200 - Carta jogada com sucesso
+ * @returns {Object} 400 - Carta inválida
+ * @example
+ * Request body:
+ * {
+ *   "game_id": 1,
+ *   "player": "Player1",
+ *   "cardPlayed": "Green 7"
+ * }
+ * Response (200 OK):
+ * {
+ *   "message": "Card played successfully.",
+ *   "cardPlayed": "Green 7",
+ *   "nextPlayer": "Player2",
+ *   "remainingCards": 6
+ * }
+ * Response (400 Bad Request):
+ * {
+ *   "message": "Invalid card. Please play a card that matches the top card on the discard pile."
+ * }
+ */
+router.put('/play-card', auth, gameController.playCard);
+
+/**
+ * @route POST /api/games/valid-cards
+ * @description Obter cartas válidas que um jogador pode jogar (usando recursão/generator)
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @body {string} player - Nome do jogador
+ * @returns {Object} 200 - Lista de cartas válidas
+ * @example
+ * Request body:
+ * {
+ *   "game_id": 1,
+ *   "player": "Player1"
+ * }
+ * Response:
+ * {
+ *   "player": "Player1",
+ *   "topCard": "Red 7",
+ *   "currentColor": null,
+ *   "validCards": ["Red 3", "Red Skip", "Green 7", "Wild"],
+ *   "totalValidCards": 4
+ * }
+ */
+router.post('/valid-cards', auth, gameController.getValidCards);
+
 module.exports = router;
