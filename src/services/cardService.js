@@ -1,24 +1,29 @@
 const Card = require('../models/card');
 
+const CardRepository = require('../Repository/cardRepository');
+
 class CardService {
   async createCard(data) {
-    return await Card.create(data);
+    return await CardRepository.saveCard(data);
   }
 
   async getCardById(id) {
-    const card = await Card.findByPk(id);
+    const card = await CardRepository.findById(id);
     if (!card) throw new Error('Cartão não encontrado');
     return card;
   }
 
   async updateCard(id, data) {
     const card = await this.getCardById(id);
-    return await card.update(data);
+    if (!card) throw new Error('Cartão não encontrado')
+
+    return await CardRepository.updateCard(id, data);
   }
 
   async deleteCard(id) {
     const card = await this.getCardById(id);
-    await card.destroy();
+    if (!card) throw new Error('Cartão não encontrado')
+    await CardRepository.deleteById(card.id);
     return { message: 'Cartão removido com sucesso' };
   }
 
