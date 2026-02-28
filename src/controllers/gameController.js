@@ -388,3 +388,128 @@ exports.getValidCards = async (req, res) => {
     return res.status(400).json({ error: error.message });
   }
 };
+
+/**
+ * Compra uma carta do baralho (quando não pode jogar)
+ * @route PUT /api/games/draw-card
+ * @param {Object} req - Objeto de requisição
+ * @param {number} req.body.game_id - ID do jogo
+ * @param {string} req.body.player - Nome do jogador
+ * @param {Object} res - Objeto de resposta
+ */
+exports.drawCard = async (req, res) => {
+  try {
+    const { game_id, player } = req.body;
+
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    if (!player) {
+      return res.status(400).json({ error: 'player é obrigatório' });
+    }
+
+    const result = await gameService.drawCard(game_id, player);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Jogador diz "UNO" quando tem 1 carta restante
+ * @route PATCH /api/games/say-uno
+ * @param {Object} req - Objeto de requisição
+ * @param {number} req.body.game_id - ID do jogo
+ * @param {string} req.body.player - Nome do jogador
+ * @param {string} req.body.action - Deve ser "Say UNO"
+ * @param {Object} res - Objeto de resposta
+ */
+exports.sayUno = async (req, res) => {
+  try {
+    const { game_id, player, action } = req.body;
+
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    if (!player) {
+      return res.status(400).json({ error: 'player é obrigatório' });
+    }
+    if (action !== 'Say UNO') {
+      return res.status(400).json({ error: 'action deve ser "Say UNO"' });
+    }
+
+    const result = await gameService.sayUno(game_id, player);
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Desafia um jogador que não disse "UNO"
+ * @route POST /api/games/challenge-uno
+ * @param {Object} req - Objeto de requisição
+ * @param {number} req.body.game_id - ID do jogo
+ * @param {string} req.body.challenger - Nome do desafiante
+ * @param {string} req.body.challengedPlayer - Nome do jogador desafiado
+ * @param {Object} res - Objeto de resposta
+ */
+exports.challengeUno = async (req, res) => {
+  try {
+    const { game_id, challenger, challengedPlayer } = req.body;
+
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    if (!challenger) {
+      return res.status(400).json({ error: 'challenger é obrigatório' });
+    }
+    if (!challengedPlayer) {
+      return res.status(400).json({ error: 'challengedPlayer é obrigatório' });
+    }
+
+    const result = await gameService.challengeUno(game_id, challenger, challengedPlayer);
+    return res.status(200).json(result);
+  } catch (error) {
+    if (error.message.includes('Challenge failed')) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Ação unificada de turno: jogar carta ou comprar carta
+ * O turno termina automaticamente após a ação.
+ * @route PUT /api/games/turn
+ * @param {Object} req - Objeto de requisição
+ * @param {number} req.body.game_id - ID do jogo
+ * @param {string} req.body.player - Nome do jogador
+ * @param {string} req.body.action - "play-card" ou "draw-card"
+ * @param {string} [req.body.card] - Carta a jogar (obrigatório se action = "play-card")
+ * @param {string} [req.body.chosenColor] - Cor escolhida (obrigatório para Wild)
+ * @param {Object} res - Objeto de resposta
+ */
+exports.executeTurn = async (req, res) => {
+  try {
+    const { game_id, player, action, card, chosenColor } = req.body;
+
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id é obrigatório' });
+    }
+    if (!player) {
+      return res.status(400).json({ error: 'player é obrigatório' });
+    }
+    if (!action) {
+      return res.status(400).json({ error: 'action é obrigatório' });
+    }
+
+    const result = await gameService.executeTurn(game_id, player, action, card, chosenColor);
+    return res.status(200).json(result);
+  } catch (error) {
+    if (error.message.includes('Invalid card')) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(400).json({ error: error.message });
+  }
+};

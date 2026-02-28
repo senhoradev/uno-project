@@ -128,6 +128,36 @@ const Game = sequelize.define('Game', {
     defaultValue: [],
     allowNull: false,
     comment: "Armazena as cartas restantes no baralho para compra"
+  },
+  /**
+   * Direção do jogo (1 = horário, -1 = anti-horário)
+   * @type {number}
+   */
+  direction: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+    allowNull: false,
+    comment: "1 = horário, -1 = anti-horário"
+  },
+  /**
+   * Índice do jogador atual na ordem do jogo
+   * @type {number}
+   */
+  currentPlayerIndex: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: false,
+    comment: "Índice do jogador atual na lista ordenada de jogadores"
+  },
+  /**
+   * Quantidade de cartas a serem compradas pelo próximo jogador (acúmulo de Draw Two / Wild Draw Four)
+   * @type {number}
+   */
+  drawPenalty: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+    allowNull: false,
+    comment: "Cartas pendentes de compra acumuladas"
   }
 });
 

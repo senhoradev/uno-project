@@ -1,5 +1,5 @@
 /**
- * @fileoverview Serviço responsável pela lógica de negócio dos jogos
+ * @fileoverview Serviço responsável pela lógica de negócio dos jogos UNO
  * @module services/gameService
  */
 
@@ -14,6 +14,11 @@ const Result = require('../utils/Result');
  * @class GameService
  */
 class GameService {
+
+  // ========================================================
+  // LOBBY / LIFECYCLE METHODS (mantidos da implementação original)
+  // ========================================================
+
   /**
    * Cria um novo jogo e adiciona o criador automaticamente como primeiro jogador
    * @param {Object} data - Dados do jogo (nome, regras, maxPlayers)
@@ -40,10 +45,6 @@ class GameService {
 
   /**
    * Permite que um usuário entre em um jogo existente
-   * @param {number} gameId - ID do jogo
-   * @param {number} playerId - ID do jogador
-   * @returns {Promise<boolean>} Retorna true se sucesso
-   * @throws {Error} Se jogo não estiver esperando, estiver cheio ou usuário já estiver nele
    */
   async joinGame(gameId, playerId) {
     const game = await this.getGameById(gameId);
@@ -76,10 +77,6 @@ class GameService {
 
   /**
    * Alterna o status de "pronto" de um jogador no jogo
-   * @param {number} gameId - ID do jogo
-   * @param {number} playerId - ID do jogador
-   * @returns {Promise<Object>} Objeto com novo status e mensagem
-   * @throws {Error} Se jogo já iniciou ou usuário não está no jogo
    */
   async toggleReady(gameId, playerId) {
     const game = await this.getGameById(gameId);
@@ -107,10 +104,6 @@ class GameService {
 
   /**
    * Permite que um usuário abandone um jogo
-   * @param {number} gameId - ID do jogo
-   * @param {number} playerId - ID do jogador
-   * @returns {Promise<boolean>} Retorna true se sucesso
-   * @throws {Error} Se jogo não estiver em andamento ou usuário não estiver nele
    */
   async leaveGame(gameId, playerId) {
     const game = await this.getGameById(gameId);
@@ -139,10 +132,6 @@ class GameService {
 
   /**
    * Finaliza um jogo
-   * @param {number} gameId - ID do jogo
-   * @param {number} userId - ID do usuário solicitante (deve ser o criador)
-   * @returns {Promise<boolean>} Retorna true se sucesso
-   * @throws {Error} Se usuário não for criador ou jogo não estiver em andamento
    */
   async endGame(gameId, userId) {
     const game = await this.getGameById(gameId);
@@ -161,8 +150,6 @@ class GameService {
 
   /**
    * Obtém o estado atual do jogo
-   * @param {number} gameId - ID do jogo
-   * @returns {Promise<Object>} Objeto com ID e status do jogo
    */
   async getGameState(gameId) {
     const game = await this.getGameById(gameId);
@@ -174,8 +161,6 @@ class GameService {
 
   /**
    * Obtém a lista de jogadores no jogo
-   * @param {number} gameId - ID do jogo
-   * @returns {Promise<Object>} Objeto com ID do jogo e lista de nomes de jogadores
    */
   async getGamePlayers(gameId) {
     const game = await this.getGameById(gameId);
@@ -189,11 +174,7 @@ class GameService {
   }
 
   /**
-   * Inicia o jogo
-   * @param {number} gameId - ID do jogo
-   * @param {number} userId - ID do usuário solicitante (deve ser o criador)
-   * @returns {Promise<boolean>} Retorna true se sucesso
-   * @throws {Error} Se não for criador, menos de 2 jogadores ou nem todos prontos
+   * Inicia o jogo - configura turnOrder para cada jogador
    */
   async startGame(gameId, userId) {
     const game = await this.getGameById(gameId);
@@ -201,7 +182,7 @@ class GameService {
       throw new Error('Apenas o criador do jogo pode iniciar a partida');
     }
 
-    const players = await GamePlayer.findAll({ where: { gameId } });
+    const players = await GamePlayer.findAll({ where: { gameId }, order: [['id', 'ASC']] });
     if (players.length < 2) {
       throw new Error('É necessário pelo menos 2 jogadores para iniciar');
     }
@@ -211,19 +192,20 @@ class GameService {
       throw new Error('Nem todos os jogadores estão prontos');
     }
 
-    if (players.length > 0) {
-      await players[0].update({ isCurrentTurn: true });
+    // Atribui turnOrder sequencial a cada jogador
+    for (let i = 0; i < players.length; i++) {
+      await players[i].update({ 
+        turnOrder: i, 
+        isCurrentTurn: i === 0 
+      });
     }
 
-    await game.update({ status: 'started' });
+    await game.update({ status: 'started', currentPlayerIndex: 0, direction: 1 });
     return true;
   }
 
   /**
    * Busca um jogo pelo seu ID
-   * @param {number} id - ID do jogo
-   * @returns {Promise<Game>} Instância do jogo
-   * @throws {Error} Se jogo não for encontrado
    */
   async getGameById(id) {
     const game = await Game.findByPk(id);
@@ -233,10 +215,6 @@ class GameService {
 
   /**
    * Atualiza os dados de um jogo
-   * @param {number} id - ID do jogo
-   * @param {Object} data - Dados para atualização
-   * @returns {Promise<Game>} Jogo atualizado
-   * @throws {Error} Se tentar reduzir maxPlayers abaixo do número atual de jogadores
    */
   async updateGame(id, data) {
     const game = await this.getGameById(id);
@@ -251,8 +229,6 @@ class GameService {
 
   /**
    * Remove um jogo
-   * @param {number} id - ID do jogo
-   * @returns {Promise<Object>} Mensagem de sucesso
    */
   async deleteGame(id) {
     const game = await this.getGameById(id);
@@ -261,10 +237,7 @@ class GameService {
   }
 
   /**
-   * Obtém as pontuações atuais
-   * Corrigido para usar Result.success e Result.failure
-   * @param {number} gameId - ID do jogo
-   * @returns {Promise<Result>} Result com pontuações ou erro
+   * Obtém as pontuações atuais (usando Result Monad)
    */
   async getScores(gameId) {
     try {
@@ -273,7 +246,6 @@ class GameService {
         return Result.failure('Jogo não encontrado');
       }
 
-      // Busca no repositório que inclui o Player e o atributo score
       const gamePlayers = await gameRepository.getGameScores(gameId);
 
       if (!gamePlayers || gamePlayers.length === 0) {
@@ -282,7 +254,6 @@ class GameService {
 
       const scoresMap = {};
       gamePlayers.forEach(gp => {
-        // Pega o nome do Player vindo do include e a pontuação real do GamePlayer
         const playerName = gp.Player ? gp.Player.name : `Player${gp.playerId}`;
         scoresMap[playerName] = gp.score !== undefined ? gp.score : 0;
       });
@@ -298,9 +269,6 @@ class GameService {
 
   /**
    * Obtém o jogador atual
-   * @param {number} gameId - ID do jogo
-   * @returns {Promise<string>} Nome do usuário do jogador atual
-   * @throws {Error} Se não houver jogador atual
    */
   async getCurrentPlayer(gameId) {
     const gamePlayer = await GamePlayer.findOne({
@@ -313,9 +281,6 @@ class GameService {
 
   /**
    * Obtém a carta do topo
-   * @param {number} gameId - ID do jogo
-   * @returns {Promise<string>} String representando a carta
-   * @throws {Error} Se pilha estiver vazia
    */
   async getTopCard(gameId) {
     const game = await this.getGameById(gameId);
@@ -324,86 +289,560 @@ class GameService {
     return discardPile[discardPile.length - 1];
   }
 
+  // ========================================================
+  // HELPERS: Busca de jogadores ordenados por turno
+  // ========================================================
+
   /**
-   * Distribui cartas (Recursivo)
+   * Retorna os jogadores do jogo ordenados por turnOrder (ASC)
+   * @param {number} gameId
+   * @returns {Promise<GamePlayer[]>}
+   */
+  async getOrderedPlayers(gameId) {
+    return GamePlayer.findAll({
+      where: { gameId },
+      include: [{ model: Player, attributes: ['id', 'username'] }],
+      order: [['turnOrder', 'ASC']]
+    });
+  }
+
+  /**
+   * Calcula o índice do próximo jogador com base na direção.
+   * @param {number} currentIndex - índice atual
+   * @param {number} direction - 1 ou -1
+   * @param {number} totalPlayers - total de jogadores
+   * @param {number} [skip=1] - quantas posições avançar (2 para Skip)
+   * @returns {number} próximo índice
+   */
+  getNextPlayerIndex(currentIndex, direction, totalPlayers, skip = 1) {
+    return ((currentIndex + direction * skip) % totalPlayers + totalPlayers) % totalPlayers;
+  }
+
+  /**
+   * Avança o turno para o próximo jogador e atualiza isCurrentTurn de todos.
+   * @param {GamePlayer[]} gamePlayers - lista ordenada
+   * @param {number} nextIndex - índice do próximo
+   */
+  async advanceTurn(gamePlayers, nextIndex) {
+    for (const gp of gamePlayers) {
+      const shouldBeCurrent = gp.turnOrder === nextIndex;
+      if (gp.isCurrentTurn !== shouldBeCurrent) {
+        await gp.update({ isCurrentTurn: shouldBeCurrent });
+      }
+    }
+  }
+
+  /**
+   * Reaproveita a pilha de descarte como baralho quando o deck fica vazio.
+   * Mantém a última carta na pilha de descarte.
+   * @param {Game} game
+   * @returns {Promise<string[]>} novo deck embaralhado
+   */
+  async reshuffleDeckFromDiscard(game) {
+    const discardPile = [...(game.discardPile || [])];
+    const topCard = discardPile.pop(); // mantém a última carta
+    const newDeck = this.shuffleDeck(discardPile);
+    await game.update({ deck: newDeck, discardPile: [topCard] });
+    return newDeck;
+  }
+
+  // ========================================================
+  // 1. DISTRIBUIÇÃO DE CARTAS (RECURSIVA)
+  // ========================================================
+
+  /**
+   * Distribui cartas aos jogadores usando recursão.
+   * Cria um baralho UNO completo, embaralha, distribui recursivamente,
+   * coloca a primeira carta válida (não-Wild) na pilha de descarte.
+   *
    * @param {number} gameId - ID do jogo
    * @param {number} [cardsPerPlayer=7] - Número de cartas por jogador
    * @returns {Promise<Object>} Resultado da distribuição
-   * @throws {Error} Se não houver jogadores
    */
   async dealCards(gameId, cardsPerPlayer = 7) {
     const game = await this.getGameById(gameId);
-    const gamePlayers = await GamePlayer.findAll({
-      where: { gameId },
-      include: [{ model: Player, attributes: ['id', 'username'] }]
-    });
+    const gamePlayers = await this.getOrderedPlayers(gameId);
 
     if (gamePlayers.length === 0) throw new Error('Sem jogadores');
 
     const playerNames = gamePlayers.map(gp => gp.Player ? gp.Player.username : `Player${gp.playerId}`);
     const deck = this.shuffleDeck(this.createUnoDeck());
 
+    // Distribui recursivamente
     const playerHands = this.dealCardsRecursive(playerNames, cardsPerPlayer, deck);
 
+    // Persiste a mão de cada jogador e reseta saidUno
     for (const gamePlayer of gamePlayers) {
       const name = gamePlayer.Player ? gamePlayer.Player.username : `Player${gamePlayer.playerId}`;
-      await gamePlayer.update({ hand: playerHands[name] || [] });
+      await gamePlayer.update({ hand: playerHands[name] || [], saidUno: false });
     }
 
-    const firstCard = deck.pop();
-    await game.update({ discardPile: [firstCard], deck: deck });
+    // Primeira carta da pilha de descarte deve ser uma carta numérica (não Wild, não ação)
+    let firstCard = this.drawFirstValidCard(deck);
+
+    // Define a cor atual baseada na primeira carta
+    const firstCardParts = firstCard.split(' ');
+    const firstColor = firstCardParts[0]; // Red, Blue, Green, Yellow
+
+    await game.update({ 
+      discardPile: [firstCard], 
+      deck: deck, 
+      currentColor: firstColor,
+      direction: 1,
+      currentPlayerIndex: 0,
+      drawPenalty: 0
+    });
 
     return { message: 'Cards dealt successfully.', players: playerHands, firstCard };
   }
 
   /**
-   * Executa a jogada de uma carta
-   * @param {number} gameId - ID do jogo
-   * @param {string} playerUsername - Nome do usuário que está jogando
-   * @param {string} cardPlayed - Carta sendo jogada
-   * @param {string} [chosenColor] - Cor escolhida (para cartas curinga)
-   * @returns {Promise<Object>} Resultado da jogada
-   * @throws {Error} Vários erros de validação de regra de negócio
+   * Retira a primeira carta válida (numérica, não-Wild) para iniciar a pilha de descarte.
+   * Se todas forem Wild/ação, aceita qualquer carta colorida.
+   * @param {string[]} deck - deck mutável (modifica in-place)
+   * @returns {string} carta inicial
+   */
+  drawFirstValidCard(deck) {
+    // Procura uma carta numérica (ex: "Red 3") - evita Wild e ações
+    for (let i = deck.length - 1; i >= 0; i--) {
+      const card = deck[i];
+      const parts = card.split(' ');
+      // Carta numérica: tem 2 partes, primeira é cor, segunda é número 0-9
+      if (parts.length === 2 && ['Red','Blue','Green','Yellow'].includes(parts[0]) && /^[0-9]$/.test(parts[1])) {
+        deck.splice(i, 1);
+        return card;
+      }
+    }
+    // Fallback: qualquer carta com cor
+    for (let i = deck.length - 1; i >= 0; i--) {
+      const card = deck[i];
+      if (!card.startsWith('Wild')) {
+        deck.splice(i, 1);
+        return card;
+      }
+    }
+    // Último recurso
+    return deck.pop();
+  }
+
+  // ========================================================
+  // 2. JOGAR CARTA SEGUINDO AS REGRAS
+  // ========================================================
+
+  /**
+   * Verifica se uma carta é válida para ser jogada sobre a carta do topo.
+   * @param {string} card - carta a jogar
+   * @param {string} topCard - carta do topo da pilha
+   * @param {string} currentColor - cor corrente do jogo (pode diferir da topCard se foi Wild)
+   * @returns {boolean}
+   */
+  isCardValid(card, topCard, currentColor) {
+    if (card.startsWith('Wild')) return true;
+
+    const cardParts = card.split(' ');
+    const topParts = topCard.split(' ');
+
+    const cardColor = cardParts[0];
+    const cardValue = cardParts.slice(1).join(' '); // "Draw Two", "Skip", "Reverse", ou número
+
+    const topValue = topParts[0] === 'Wild' ? null : topParts.slice(1).join(' ');
+
+    // Mesma cor (comparar com currentColor, não com a cor literal da topCard se foi Wild)
+    if (cardColor === currentColor) return true;
+
+    // Mesmo valor/ação
+    if (topValue && cardValue === topValue) return true;
+
+    return false;
+  }
+
+  /**
+   * Joga uma carta seguindo todas as regras do UNO:
+   * - Valida turno do jogador
+   * - Valida se a carta é compatível (cor, número/ação, ou Wild)
+   * - Aplica efeitos de cartas de ação (Skip, Reverse, Draw Two, Wild, Wild Draw Four)
+   * - Gerencia troca de turno respeitando direção
+   * - Detecta vitória quando mão fica vazia
+   *
+   * @param {number} gameId
+   * @param {string} playerUsername
+   * @param {string} cardPlayed - string da carta, ex: "Red 7", "Wild Draw Four"
+   * @param {string} [chosenColor] - cor escolhida ao jogar Wild
+   * @returns {Promise<Object>} resultado da jogada
    */
   async playCard(gameId, playerUsername, cardPlayed, chosenColor = null) {
     const game = await this.getGameById(gameId);
     if (game.status !== 'started') throw new Error('Jogo não iniciado');
 
-    const gamePlayers = await GamePlayer.findAll({
-      where: { gameId },
-      include: [{ model: Player, attributes: ['id', 'username'] }],
-      order: [['id', 'ASC']]
-    });
+    const gamePlayers = await this.getOrderedPlayers(gameId);
+    const totalPlayers = gamePlayers.length;
 
-    const playingPlayerIndex = gamePlayers.findIndex(gp => gp.Player && gp.Player.username === playerUsername);
-    const currentPlayer = gamePlayers[playingPlayerIndex];
+    // Encontra o jogador que está tentando jogar
+    const currentGP = gamePlayers.find(gp => gp.Player && gp.Player.username === playerUsername);
+    if (!currentGP) throw new Error('Jogador não encontrado neste jogo');
+    if (!currentGP.isCurrentTurn) throw new Error('Não é sua vez');
 
-    if (!currentPlayer || !currentPlayer.isCurrentTurn) throw new Error('Não é sua vez');
+    // Verifica se a carta está na mão
+    const playerHand = [...(currentGP.hand || [])];
+    const cardIndex = playerHand.indexOf(cardPlayed);
+    if (cardIndex === -1) throw new Error('Carta não encontrada na mão');
 
-    const playerHand = currentPlayer.hand || [];
-    if (!playerHand.includes(cardPlayed)) throw new Error('Carta não encontrada');
+    // Valida carta contra a pilha de descarte
+    const discardPile = [...(game.discardPile || [])];
+    const topCard = discardPile[discardPile.length - 1];
+    const currentColor = game.currentColor || topCard.split(' ')[0];
 
-    const newHand = playerHand.filter(c => c !== cardPlayed);
-    await currentPlayer.update({ hand: newHand, isCurrentTurn: false });
-
-    const discardPile = game.discardPile || [];
-    discardPile.push(cardPlayed);
-    await game.update({ discardPile });
-
-    if (newHand.length === 0) {
-      await game.update({ status: 'finished' });
-      return { message: 'You won!', winner: playerUsername };
+    if (!this.isCardValid(cardPlayed, topCard, currentColor)) {
+      throw new Error('Invalid card. Please play a card that matches the top card on the discard pile.');
     }
 
-    const nextIndex = (playingPlayerIndex + 1) % gamePlayers.length;
-    await gamePlayers[nextIndex].update({ isCurrentTurn: true });
+    // Valida que Wild requer chosenColor
+    if (cardPlayed.startsWith('Wild') && !chosenColor) {
+      throw new Error('Você deve escolher uma cor ao jogar uma carta Wild.');
+    }
+    if (chosenColor && !['Red', 'Blue', 'Green', 'Yellow'].includes(chosenColor)) {
+      throw new Error('Cor inválida. Escolha entre: Red, Blue, Green, Yellow.');
+    }
 
-    return { message: 'Card played successfully.', nextPlayer: gamePlayers[nextIndex].Player.username };
+    // Remove carta da mão
+    playerHand.splice(cardIndex, 1);
+
+    // Atualiza pilha de descarte
+    discardPile.push(cardPlayed);
+
+    // Determina nova cor
+    let newColor;
+    if (cardPlayed.startsWith('Wild')) {
+      newColor = chosenColor;
+    } else {
+      newColor = cardPlayed.split(' ')[0];
+    }
+
+    // Reseta saidUno se jogador tinha dito e agora tem mais de 1 carta
+    let saidUno = currentGP.saidUno;
+    if (playerHand.length !== 1) {
+      saidUno = false;
+    }
+
+    // Atualiza a mão do jogador
+    await currentGP.update({ hand: playerHand, isCurrentTurn: false, saidUno });
+
+    // Verifica vitória (mão vazia)
+    if (playerHand.length === 0) {
+      await game.update({ discardPile, currentColor: newColor, status: 'finished' });
+      return { 
+        message: `${playerUsername} played ${cardPlayed}. ${playerUsername} wins!`, 
+        winner: playerUsername 
+      };
+    }
+
+    // Aplica efeitos de cartas de ação
+    let direction = game.direction;
+    let currentIndex = game.currentPlayerIndex;
+    let drawPenalty = game.drawPenalty || 0;
+    const cardValue = cardPlayed.startsWith('Wild') 
+      ? (cardPlayed === 'Wild Draw Four' ? 'Draw Four' : null)
+      : cardPlayed.split(' ').slice(1).join(' ');
+
+    let skippedPlayer = null;
+    let nextIndex;
+
+    if (cardValue === 'Reverse') {
+      // Inverte a direção
+      direction *= -1;
+      if (totalPlayers === 2) {
+        // Com 2 jogadores, Reverse funciona como Skip
+        nextIndex = currentIndex; // mesmo jogador joga novamente
+      } else {
+        nextIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers);
+      }
+    } else if (cardValue === 'Skip') {
+      // Pula o próximo jogador
+      const skippedIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers);
+      skippedPlayer = gamePlayers[skippedIndex].Player 
+        ? gamePlayers[skippedIndex].Player.username 
+        : `Player${gamePlayers[skippedIndex].playerId}`;
+      nextIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers, 2);
+    } else if (cardValue === 'Draw Two') {
+      // Próximo jogador compra 2 cartas e perde o turno
+      const penaltyIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers);
+      const penaltyPlayer = gamePlayers[penaltyIndex];
+      const penaltyHand = [...(penaltyPlayer.hand || [])];
+      let deck = [...(game.deck || [])];
+
+      for (let i = 0; i < 2; i++) {
+        if (deck.length === 0) {
+          deck = await this.reshuffleDeckFromDiscard(game);
+        }
+        if (deck.length > 0) {
+          penaltyHand.push(deck.pop());
+        }
+      }
+
+      await penaltyPlayer.update({ hand: penaltyHand, saidUno: false });
+      // Atualiza deck no game antes de continuar
+      await game.update({ deck });
+
+      skippedPlayer = penaltyPlayer.Player 
+        ? penaltyPlayer.Player.username 
+        : `Player${penaltyPlayer.playerId}`;
+      nextIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers, 2);
+    } else if (cardValue === 'Draw Four') {
+      // Wild Draw Four: próximo jogador compra 4 e perde turno
+      const penaltyIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers);
+      const penaltyPlayer = gamePlayers[penaltyIndex];
+      const penaltyHand = [...(penaltyPlayer.hand || [])];
+      let deck = [...(game.deck || [])];
+
+      for (let i = 0; i < 4; i++) {
+        if (deck.length === 0) {
+          deck = await this.reshuffleDeckFromDiscard(game);
+        }
+        if (deck.length > 0) {
+          penaltyHand.push(deck.pop());
+        }
+      }
+
+      await penaltyPlayer.update({ hand: penaltyHand, saidUno: false });
+      await game.update({ deck });
+
+      skippedPlayer = penaltyPlayer.Player 
+        ? penaltyPlayer.Player.username 
+        : `Player${penaltyPlayer.playerId}`;
+      nextIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers, 2);
+    } else {
+      // Carta normal (número ou Wild sem efeito especial)
+      nextIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers);
+    }
+
+    // Persiste estado do jogo
+    await game.update({ 
+      discardPile, 
+      currentColor: newColor, 
+      direction, 
+      currentPlayerIndex: nextIndex 
+    });
+
+    // Avança o turno
+    await this.advanceTurn(gamePlayers, nextIndex);
+
+    const nextPlayerName = gamePlayers[nextIndex].Player 
+      ? gamePlayers[nextIndex].Player.username 
+      : `Player${gamePlayers[nextIndex].playerId}`;
+
+    const response = { 
+      message: `Card played successfully.`, 
+      cardPlayed,
+      nextPlayer: nextPlayerName,
+      remainingCards: playerHand.length
+    };
+
+    if (skippedPlayer) {
+      response.skippedPlayer = skippedPlayer;
+    }
+
+    if (playerHand.length === 1) {
+      response.warning = `${playerUsername} has UNO! (1 card left)`;
+    }
+
+    return response;
   }
 
+  // ========================================================
+  // 3. COMPRAR CARTA DO BARALHO
+  // ========================================================
+
   /**
-   * Cria um baralho completo de UNO (Restaurado)
-   * @returns {string[]} Array contendo as cartas do baralho
+   * O jogador compra uma carta do baralho (quando não pode jogar).
+   * O turno passa para o próximo jogador.
+   *
+   * @param {number} gameId
+   * @param {string} playerUsername
+   * @returns {Promise<Object>} resultado com a carta comprada
+   */
+  async drawCard(gameId, playerUsername) {
+    const game = await this.getGameById(gameId);
+    if (game.status !== 'started') throw new Error('Jogo não iniciado');
+
+    const gamePlayers = await this.getOrderedPlayers(gameId);
+    const totalPlayers = gamePlayers.length;
+
+    const currentGP = gamePlayers.find(gp => gp.Player && gp.Player.username === playerUsername);
+    if (!currentGP) throw new Error('Jogador não encontrado neste jogo');
+    if (!currentGP.isCurrentTurn) throw new Error('Não é sua vez');
+
+    let deck = [...(game.deck || [])];
+
+    // Se o deck está vazio, reembaralha a pilha de descarte
+    if (deck.length === 0) {
+      deck = await this.reshuffleDeckFromDiscard(game);
+    }
+
+    if (deck.length === 0) {
+      throw new Error('Não há cartas disponíveis para comprar.');
+    }
+
+    const drawnCard = deck.pop();
+    const playerHand = [...(currentGP.hand || []), drawnCard];
+
+    // Reseta saidUno pois agora tem mais cartas
+    await currentGP.update({ hand: playerHand, isCurrentTurn: false, saidUno: false });
+
+    // Avança turno
+    const direction = game.direction;
+    const currentIndex = game.currentPlayerIndex;
+    const nextIndex = this.getNextPlayerIndex(currentIndex, direction, totalPlayers);
+
+    await game.update({ deck, currentPlayerIndex: nextIndex });
+    await this.advanceTurn(gamePlayers, nextIndex);
+
+    const nextPlayerName = gamePlayers[nextIndex].Player 
+      ? gamePlayers[nextIndex].Player.username 
+      : `Player${gamePlayers[nextIndex].playerId}`;
+
+    return { 
+      message: `${playerUsername} drew a card from the deck.`,
+      cardDrawn: drawnCard,
+      nextPlayer: nextPlayerName
+    };
+  }
+
+  // ========================================================
+  // 4. DIZER "UNO"
+  // ========================================================
+
+  /**
+   * Jogador declara "UNO" quando tem exatamente 1 carta restante.
+   * Deve ser chamado DEPOIS de jogar a penúltima carta (ficando com 1).
+   *
+   * @param {number} gameId
+   * @param {string} playerUsername
+   * @returns {Promise<Object>} resultado
+   */
+  async sayUno(gameId, playerUsername) {
+    const game = await this.getGameById(gameId);
+    if (game.status !== 'started') throw new Error('Jogo não iniciado');
+
+    const gamePlayers = await this.getOrderedPlayers(gameId);
+    const currentGP = gamePlayers.find(gp => gp.Player && gp.Player.username === playerUsername);
+
+    if (!currentGP) throw new Error('Jogador não encontrado neste jogo');
+
+    const playerHand = currentGP.hand || [];
+
+    if (playerHand.length !== 1) {
+      throw new Error('Você só pode dizer UNO quando tiver exatamente 1 carta.');
+    }
+
+    if (currentGP.saidUno) {
+      throw new Error('Você já disse UNO.');
+    }
+
+    await currentGP.update({ saidUno: true });
+
+    return { message: `${playerUsername} said UNO successfully.` };
+  }
+
+  // ========================================================
+  // 5. DESAFIAR JOGADOR QUE NÃO DISSE "UNO"
+  // ========================================================
+
+  /**
+   * Um jogador desafia outro que tem 1 carta e não disse UNO.
+   * Se o desafio for bem-sucedido, o jogador desafiado compra 2 cartas.
+   * Se o desafio falhar (ele disse UNO a tempo), retorna erro.
+   *
+   * @param {number} gameId
+   * @param {string} challengerUsername - quem está desafiando
+   * @param {string} challengedUsername - quem está sendo desafiado
+   * @returns {Promise<Object>} resultado do desafio
+   */
+  async challengeUno(gameId, challengerUsername, challengedUsername) {
+    const game = await this.getGameById(gameId);
+    if (game.status !== 'started') throw new Error('Jogo não iniciado');
+
+    const gamePlayers = await this.getOrderedPlayers(gameId);
+
+    const challengerGP = gamePlayers.find(gp => gp.Player && gp.Player.username === challengerUsername);
+    if (!challengerGP) throw new Error('Desafiante não encontrado neste jogo');
+
+    const challengedGP = gamePlayers.find(gp => gp.Player && gp.Player.username === challengedUsername);
+    if (!challengedGP) throw new Error('Jogador desafiado não encontrado neste jogo');
+
+    const challengedHand = challengedGP.hand || [];
+
+    // Só pode desafiar se o jogador tem exatamente 1 carta
+    if (challengedHand.length !== 1) {
+      throw new Error('Challenge failed. Player does not have exactly 1 card.');
+    }
+
+    // Se já disse UNO, desafio falha
+    if (challengedGP.saidUno) {
+      throw new Error(`Challenge failed. ${challengedUsername} said UNO on time.`);
+    }
+
+    // Desafio bem-sucedido: jogador desafiado compra 2 cartas
+    let deck = [...(game.deck || [])];
+    const newHand = [...challengedHand];
+
+    for (let i = 0; i < 2; i++) {
+      if (deck.length === 0) {
+        deck = await this.reshuffleDeckFromDiscard(game);
+      }
+      if (deck.length > 0) {
+        newHand.push(deck.pop());
+      }
+    }
+
+    await challengedGP.update({ hand: newHand, saidUno: false });
+    await game.update({ deck });
+
+    return { 
+      message: `Challenge successful. ${challengedUsername} forgot to say UNO and draws 2 cards.`
+    };
+  }
+
+  // ========================================================
+  // 6. TURNO TERMINA APÓS JOGAR OU COMPRAR
+  //    (Já implementado nativamente em playCard e drawCard acima)
+  //    Este método é uma ação unificada para uso pelo controller.
+  // ========================================================
+
+  /**
+   * Ação de turno unificada: o jogador joga uma carta ou compra do baralho.
+   * O turno termina automaticamente após qualquer ação válida.
+   *
+   * @param {number} gameId
+   * @param {string} playerUsername
+   * @param {string} action - "play-card" ou "draw-card"
+   * @param {string} [card] - carta a jogar (necessário se action = "play-card")
+   * @param {string} [chosenColor] - cor escolhida para Wild
+   * @returns {Promise<Object>} resultado da ação
+   */
+  async executeTurn(gameId, playerUsername, action, card = null, chosenColor = null) {
+    if (action === 'play-card') {
+      if (!card) throw new Error('Você deve especificar qual carta jogar.');
+      const result = await this.playCard(gameId, playerUsername, card, chosenColor);
+      result.message = `${playerUsername} played ${card}. Turn ended.`;
+      return result;
+    } else if (action === 'draw-card') {
+      const result = await this.drawCard(gameId, playerUsername);
+      result.message = `${playerUsername} drew a card. Turn ended.`;
+      return result;
+    } else {
+      throw new Error('Ação inválida. Use "play-card" ou "draw-card".');
+    }
+  }
+
+  // ========================================================
+  // DECK CREATION & DISTRIBUTION HELPERS
+  // ========================================================
+
+  /**
+   * Cria um baralho completo de UNO (108 cartas)
+   * - 4 cores (Red, Blue, Green, Yellow): 1x "0", 2x "1-9", 2x Skip, 2x Reverse, 2x Draw Two
+   * - 4x Wild, 4x Wild Draw Four
+   * @returns {string[]}
    */
   createUnoDeck() {
     const deck = [];
@@ -412,29 +851,33 @@ class GameService {
     const actions = ['Skip', 'Reverse', 'Draw Two'];
 
     colors.forEach(color => {
+      // Um "0" por cor
       deck.push(`${color} 0`);
+      // Dois de cada "1-9" por cor
       numbers.slice(1).forEach(number => {
         deck.push(`${color} ${number}`);
         deck.push(`${color} ${number}`);
       });
+      // Dois de cada ação por cor
       actions.forEach(action => {
         deck.push(`${color} ${action}`);
         deck.push(`${color} ${action}`);
       });
     });
 
+    // 4 Wild e 4 Wild Draw Four
     for (let i = 0; i < 4; i++) {
       deck.push('Wild');
       deck.push('Wild Draw Four');
     }
 
-    return deck;
+    return deck; // 108 cartas
   }
 
   /**
    * Embaralha um array (Algoritmo Fisher-Yates)
-   * @param {Array} array - O array a ser embaralhado
-   * @returns {Array} O array embaralhado
+   * @param {Array} array
+   * @returns {Array}
    */
   shuffleDeck(array) {
     const shuffled = [...array];
@@ -446,21 +889,21 @@ class GameService {
   }
   
   /**
-   * Distribui cartas recursivamente
-   * @param {string[]} players - Lista de nomes dos jogadores
-   * @param {number} cards - Número total de cartas a distribuir por jogador
-   * @param {string[]} deck - O baralho atual
-   * @param {Object} [hands={}] - Objeto acumulador das mãos (uso interno da recursão)
-   * @param {number} [pIdx=0] - Índice do jogador atual (uso interno)
-   * @param {number} [round=0] - Rodada atual de distribuição (uso interno)
-   * @returns {Object} Mapa com as mãos dos jogadores (chave: nome, valor: array de cartas)
+   * Distribui cartas recursivamente entre jogadores.
+   * @param {string[]} players - nomes dos jogadores
+   * @param {number} cards - cartas por jogador
+   * @param {string[]} deck - baralho (mutável, usa pop)
+   * @param {Object} [hands={}] - acumulador
+   * @param {number} [pIdx=0] - índice do jogador
+   * @param {number} [round=0] - rodada
+   * @returns {Object} mãos dos jogadores
    */
   dealCardsRecursive(players, cards, deck, hands = {}, pIdx = 0, round = 0) {
     if (round >= cards) return hands;
     const p = players[pIdx];
     if (!hands[p]) hands[p] = [];
     if (deck.length > 0) {
-        hands[p].push(deck.pop());
+      hands[p].push(deck.pop());
     }
     const nextP = (pIdx + 1) % players.length;
     const nextRound = nextP === 0 ? round + 1 : round;
@@ -469,26 +912,18 @@ class GameService {
 
   /**
    * Encontra cartas válidas recursivamente (Generator)
-   * @param {string[]} hand - Mão do jogador
-   * @param {string} topCard - Carta do topo da pilha de descarte
-   * @param {string} currentColor - Cor atual do jogo
-   * @param {number} [index=0] - Índice atual da iteração na mão (uso interno)
-   * @yields {string} A próxima carta válida encontrada na mão
+   * @param {string[]} hand
+   * @param {string} topCard
+   * @param {string} currentColor
+   * @param {number} [index=0]
+   * @yields {string}
    */
   *findValidCardsRecursive(hand, topCard, currentColor, index = 0) {
     if (index >= hand.length) return;
     
     const card = hand[index];
-    const topParts = topCard.split(' ');
-    const cardParts = card.split(' ');
-
-    // Lógica simplificada de validade (cor ou valor/ação igual, ou Wild)
-    const isWild = cardParts[0] === 'Wild';
-    const sameColor = cardParts[0] === (currentColor || topParts[0]);
-    const sameValue = cardParts[1] && cardParts[1] === topParts[1];
-
-    if (isWild || sameColor || sameValue) {
-        yield card;
+    if (this.isCardValid(card, topCard, currentColor)) {
+      yield card;
     }
     
     yield* this.findValidCardsRecursive(hand, topCard, currentColor, index + 1);
