@@ -1,18 +1,16 @@
 const playerService = require('../services/playerService');
 const PlayerResponseDTO = require('../DTO/Response/PlayerResponseDTO');
+const CreatePlayerRequestDTO = require('../DTO/Request/Player/CreatePlayerRequestDTO');
+const UpdatePlayerRequestDTO = require('../DTO/Request/Player/UpdatePlayerResquestDTO');
 
-/**
- * Função utilitária para centralizar o tratamento de erros do Result Monad
- * e mapear para os status HTTP corretos.
- */
 const sendErrorResponse = (res, error) => {
   const statusMap = {
-    'VALIDATION_ERROR': 400,
-    'CONFLICT': 409,
-    'UNAUTHORIZED': 401,
-    'NOT_FOUND': 404,
-    'DATABASE_ERROR': 500,
-    'AUTH_ERROR': 401
+    VALIDATION_ERROR: 400,
+    CONFLICT: 409,
+    UNAUTHORIZED: 401,
+    NOT_FOUND: 404,
+    DATABASE_ERROR: 500,
+    AUTH_ERROR: 401
   };
 
   return res.status(statusMap[error.code] || 400).json({
@@ -21,75 +19,79 @@ const sendErrorResponse = (res, error) => {
   });
 };
 
-exports.register = async (req, res) => {
-  const result = await playerService.createPlayer(req.body);
-  
-  if (result.isErr()) {
-    return sendErrorResponse(res, result.error);
-  }
+// CREATE
+exports.create = async (req, res) => {
+  try {
+    const dto = new CreatePlayerRequestDTO(req.body);
+    dto.validate();
 
-  // Mantém o uso da DTO para a resposta
-  const response = new PlayerResponseDTO(result.value.username, result.value.email);
-  return res.status(201).json(response);
+    const result = await playerService.createPlayer(dto);
+
+    return result.fold(
+        value => res.status(201).json(new PlayerResponseDTO(value)),
+        error => sendErrorResponse(res, error)
+    );
+
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
 };
 
+// LOGIN
 exports.login = async (req, res) => {
   const { username, password } = req.body;
   const result = await playerService.login(username, password);
-  
-  if (result.isErr()) {
-    return sendErrorResponse(res, result.error);
-  }
 
-  return res.json(result.value);
+  return result.fold(
+      value => res.json(value), // normalmente retorna token/user info
+      error => sendErrorResponse(res, error)
+  );
 };
 
-exports.create = async (req, res) => {
-  const result = await playerService.createPlayer(req.body);
-  
-  if (result.isErr()) {
-    return sendErrorResponse(res, result.error);
-  }
-
-  const response = new PlayerResponseDTO(result.value.username, result.value.email);
-  return res.status(201).json(response);
-};
-
+// GET BY ID
 exports.getById = async (req, res) => {
   const result = await playerService.getPlayerById(req.params.id);
-  
-  if (result.isErr()) {
-    return sendErrorResponse(res, result.error);
-  }
 
-  const response = new PlayerResponseDTO(result.value.username, result.value.email);
-  return res.json(response);
+  return result.fold(
+      value => res.json(new PlayerResponseDTO(value)),
+      error => sendErrorResponse(res, error)
+  );
 };
 
+// UPDATE
 exports.update = async (req, res) => {
-  const result = await playerService.updatePlayer(req.params.id, req.body);
-  
-  if (result.isErr()) {
-    return sendErrorResponse(res, result.error);
-  }
+  try {
+    const dto = new UpdatePlayerRequestDTO(req.body);
+    dto.validate(); // lança erro se inválido
 
-  const response = new PlayerResponseDTO(result.value.username, result.value.email);
-  return res.json(response);
+    const result = await playerService.updatePlayer(req.params.id, dto);
+
+    return result.fold(
+        value => res.json(new PlayerResponseDTO(value)),
+        error => sendErrorResponse(res, error)
+    );
+
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
 };
 
+// DELETE
 exports.delete = async (req, res) => {
   const result = await playerService.deletePlayer(req.params.id);
-  
-  if (result.isErr()) {
-    return sendErrorResponse(res, result.error);
-  }
+
+  return result.fold(
+      () => res.status(204).send(),
+      error => sendErrorResponse(res, error)
+  );
 };
 
+// GET ALL
 exports.getAll = async (req, res) => {
-  try {
-    const players = await playerService.getAllPlayers();
-    res.json(players);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  const result = await playerService.getAllPlayers();
+
+  return result.fold(
+      value => res.json(value.map(player => new PlayerResponseDTO(player))),
+      error => sendErrorResponse(res, error)
+  );
 };

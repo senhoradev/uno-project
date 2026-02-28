@@ -1,5 +1,5 @@
 class UpdatePlayerRequestDTO {
-    constructor({ username, password, name, age, email }) {
+    constructor({ username, password, name, age, email } = {}) {
         this.username = username;
         this.password = password;
         this.name = name;
@@ -19,7 +19,6 @@ class UpdatePlayerRequestDTO {
 
         if (!hasAtLeastOneField) {
             errors.push('At least one field must be provided');
-            return errors;
         }
 
         if (this.username !== undefined) {
@@ -56,7 +55,9 @@ class UpdatePlayerRequestDTO {
             }
         }
 
-        return errors;
+        if (errors.length > 0) {
+            throw new Error(errors.join(', '));
+        }
     }
 }
 
