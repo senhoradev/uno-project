@@ -50,9 +50,41 @@ router.post('/ready', auth, gameController.toggleReady);
  * @returns {Object} 200 - Jogo iniciado com sucesso
  */
 router.post('/start', auth, gameController.start);
+
+/**
+ * @route POST /api/games/leave
+ * @description Permite que um usuário abandone um jogo em andamento
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Mensagem de sucesso
+ */
 router.post('/leave', auth, gameController.leave);
-router.post('/end', auth, gameController.end); 
+
+/**
+ * @route POST /api/games/end
+ * @description Finaliza um jogo (apenas o criador pode finalizar)
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Mensagem de sucesso
+ */
+router.post('/end', auth, gameController.end);
+
+/**
+ * @route POST /api/games/state
+ * @description Obtém o estado atual do jogo (status)
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Objeto com ID e status do jogo
+ */
 router.post('/state', auth, gameController.getState);
+
+/**
+ * @route POST /api/games/players
+ * @description Obtém a lista de jogadores de um jogo
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Lista de nomes dos jogadores
+ */
 router.post('/players', auth, gameController.getPlayers);
 
 /**
@@ -181,5 +213,38 @@ router.put('/play-card', auth, gameController.playCard);
  * }
  */
 router.post('/valid-cards', auth, gameController.getValidCards);
+
+/**
+ * @route POST /api/games/nextTurn
+ * @description Calcula o próximo turno no sentido horário
+ * @access Private (Requer Token)
+ * @body {Array} players - Lista de jogadores
+ * @body {number} currentPlayerIndex - Índice do jogador atual
+ * @returns {Object} 200 - Índice e nome do próximo jogador
+ */
+router.post('/nextTurn', auth, gameController.nextTurn);
+
+/**
+ * @route POST /api/games/playCard
+ * @description Processa a lógica de jogar carta, incluindo Skip e Reverse
+ * @access Private (Requer Token)
+ * @body {string} cardPlayed - Carta jogada
+ * @body {number} currentPlayerIndex - Índice do jogador atual
+ * @body {Array} players - Lista de jogadores
+ * @body {string} direction - Direção do jogo
+ * @returns {Object} 200 - Novo estado do turno (direção, próximo jogador)
+ */
+router.post('/playCard', auth, gameController.playCard);
+
+/**
+ * @route POST /api/games/drawCard
+ * @description Compra uma carta do baralho quando não há jogada possível
+ * @access Private (Requer Token)
+ * @body {Array} playerHand - Mão do jogador
+ * @body {Array} deck - Baralho atual
+ * @body {string} currentCard - Carta do topo da pilha
+ * @returns {Object} 200 - Nova mão, carta comprada e se é jogável
+ */
+router.post('/drawCard', auth, gameController.drawCard);
 
 module.exports = router;

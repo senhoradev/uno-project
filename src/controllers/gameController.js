@@ -96,6 +96,85 @@ exports.leave = async (req, res) => {
 };
 
 /**
+ * Avança para o próximo turno consultando o estado real do jogo.
+ * @param {Object} req - Objeto de requisição contendo game_id no corpo
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Objeto com o próximo jogador e seu índice
+ */
+exports.nextTurn = async (req, res) => {
+  try {
+    const { game_id } = req.body; // Recebe apenas o ID
+
+    if (!game_id) return res.status(400).json({ error: 'game_id é obrigatório' });
+
+    // O serviço agora busca quem é o próximo e atualiza o banco
+    const result = await gameService.advanceTurnInDb(game_id);
+
+    return res.status(200).json({
+      status: 200,
+      body: {
+        nextPlayer: result.nextPlayer,
+        nextPlayerIndex: result.nextPlayerIndex
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Joga uma carta e gerencia as consequências (Skip, Reverse, Turno).
+ * @param {Object} req - Requisição (game_id, cardPlayed e user.id autenticado)
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Estado atualizado do turno
+ */
+exports.playCard = async (req, res) => {
+  try {
+    const { game_id, cardPlayed } = req.body;
+    const userId = req.user.id; // Jogador autenticado
+
+    if (!game_id || !cardPlayed) {
+      return res.status(400).json({ error: 'game_id e cardPlayed são obrigatórios' });
+    }
+
+    // O serviço valida se é a vez do usuário, remove a carta da mão e muda o turno
+    const result = await gameService.playCardInDb(game_id, userId, cardPlayed);
+
+    return res.status(200).json({
+      status: 200,
+      body: result
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Compra uma carta do baralho oficial da partida.
+ * @param {Object} req - Requisição (game_id e user.id autenticado)
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Resultado da compra (nova mão e carta comprada)
+ */
+exports.drawCard = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const userId = req.user.id;
+
+    if (!game_id) return res.status(400).json({ error: 'game_id é obrigatório' });
+
+    // Busca o deck e a mão no banco, processa a compra e salva
+    const result = await gameService.drawCardInDb(game_id, userId);
+
+    return res.status(200).json({
+      status: 200,
+      body: result
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
  * Finaliza um jogo 
  * @param {Object} req - Objeto de requisição contendo game_id
  * @param {Object} res - Objeto de resposta
@@ -324,11 +403,12 @@ exports.playCard = async (req, res) => {
 };
 
 /**
- * Obtém as cartas válidas que um jogador pode jogar (usando recursão/generator)
+ * Obtém as cartas válidas que um jogador pode jogar (usando recursão/generator).
  * @param {Object} req - Objeto de requisição
  * @param {number} req.body.game_id - ID do jogo
  * @param {string} req.body.player - Nome do jogador
  * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Lista de cartas válidas e carta do topo
  */
 exports.getValidCards = async (req, res) => {
   try {
@@ -342,7 +422,6 @@ exports.getValidCards = async (req, res) => {
       return res.status(400).json({ error: 'player é obrigatório' });
     }
 
-    
     const game = await Game.findByPk(game_id);
     if (!game) {
       return res.status(404).json({ error: 'Jogo não encontrado' });
