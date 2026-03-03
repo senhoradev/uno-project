@@ -51,10 +51,10 @@ describe('E2E - Fluxo de Autenticação', () => {
   });
 
   test('SignUp com email duplicado retorna 400', async () => {
-    const userA = { username: 'a1', email: 'dup@e2e.com', password: 'p1' };
+    const userA = { username: 'a1', email: 'dup@e2e.com', password: 'password123', name: 'A One', age: 30 };
     await request(app).post('/api/signup').send(userA).expect(201);
 
-    const resp = await request(app).post('/api/signup').send({ username: 'a2', email: 'dup@e2e.com', password: 'p2' });
+    const resp = await request(app).post('/api/signup').send({ username: 'a2', email: 'dup@e2e.com', password: 'password456', name: 'A Two', age: 28 });
     expect(resp.status).toBe(400);
     expect(resp.body).toHaveProperty('error', 'User already exists');
   });
