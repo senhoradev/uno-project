@@ -1,6 +1,13 @@
 const Card = require('../models/card');
 
 class CardService {
+  async getAllCards(gameId) {
+    if (gameId) {
+      return await Card.findAll({ where: { gameId } });
+    }
+    return await Card.findAll();
+  }
+
   async createCard(data) {
     return await Card.create(data);
   }

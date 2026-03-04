@@ -6,6 +6,7 @@
 const Game = require('../models/game');
 const GamePlayer = require('../models/gamePlayer');
 const Player = require('../models/player');
+const Card = require('../models/card');
 const gameRepository = require('../Repository/gameRepository');
 const Result = require('../utils/Result');
 
@@ -29,10 +30,10 @@ class GameService {
       status: 'waiting'
     });
 
-    await GamePlayer.create({ 
-      gameId: game.id, 
-      playerId: creatorId, 
-      isReady: true 
+    await GamePlayer.create({
+      gameId: game.id,
+      playerId: creatorId,
+      isReady: true
     });
 
     return game;
@@ -57,18 +58,18 @@ class GameService {
       throw new Error('O jogo está cheio');
     }
 
-    const alreadyIn = await GamePlayer.findOne({ 
-      where: { gameId, playerId } 
+    const alreadyIn = await GamePlayer.findOne({
+      where: { gameId, playerId }
     });
-    
+
     if (alreadyIn) {
       throw new Error('Usuário já está neste jogo');
     }
 
-    await GamePlayer.create({ 
-      gameId, 
-      playerId, 
-      isReady: false 
+    await GamePlayer.create({
+      gameId,
+      playerId,
+      isReady: false
     });
 
     return true;
@@ -88,10 +89,10 @@ class GameService {
       throw new Error('Não é possível alterar o status de pronto em um jogo que já iniciou ou finalizou');
     }
 
-    const gamePlayer = await GamePlayer.findOne({ 
-      where: { gameId, playerId } 
+    const gamePlayer = await GamePlayer.findOne({
+      where: { gameId, playerId }
     });
-    
+
     if (!gamePlayer) {
       throw new Error('Usuário não está neste jogo');
     }
@@ -99,7 +100,7 @@ class GameService {
     const newReadyStatus = !gamePlayer.isReady;
     await gamePlayer.update({ isReady: newReadyStatus });
 
-    return { 
+    return {
       isReady: newReadyStatus,
       message: newReadyStatus ? 'Você está pronto!' : 'Você não está mais pronto'
     };
@@ -119,10 +120,10 @@ class GameService {
       throw new Error('O jogo não está em andamento');
     }
 
-    const playerInGame = await GamePlayer.findOne({ 
-      where: { gameId, playerId } 
+    const playerInGame = await GamePlayer.findOne({
+      where: { gameId, playerId }
     });
-    
+
     if (!playerInGame) {
       throw new Error('Usuário não está neste jogo');
     }
@@ -179,7 +180,7 @@ class GameService {
    */
   async getGamePlayers(gameId) {
     const game = await this.getGameById(gameId);
-    const gamePlayers = await GamePlayer.findAll({ 
+    const gamePlayers = await GamePlayer.findAll({
       where: { gameId },
       include: [{ model: Player, attributes: ['id', 'username'] }]
     });
@@ -321,7 +322,8 @@ class GameService {
     const game = await this.getGameById(gameId);
     const discardPile = game.discardPile || [];
     if (discardPile.length === 0) throw new Error('Pilha vazia');
-    return discardPile[discardPile.length - 1];
+    const topCard = discardPile[discardPile.length - 1];
+    return topCard;
   }
 
   /**
@@ -341,16 +343,42 @@ class GameService {
     if (gamePlayers.length === 0) throw new Error('Sem jogadores');
 
     const playerNames = gamePlayers.map(gp => gp.Player ? gp.Player.username : `Player${gp.playerId}`);
-    const deck = this.shuffleDeck(this.createUnoDeck());
+    const deckStrings = this.shuffleDeck(this.createUnoDeck());
 
+    // Remove cartas anteriores deste jogo na tabela Card
+    await Card.destroy({ where: { gameId } });
+
+    // Salva todas as cartas na tabela Card
+    const cardDataArray = deckStrings.map(name => {
+      const parts = name.split(' ');
+      const color = parts[0]; // "Red", "Blue", "Wild", etc.
+      const action = parts.length > 1 ? parts.slice(1).join(' ') : parts[0]; // "7", "Skip", "Draw Four"
+      return { color, action, gameId };
+    });
+    await Card.bulkCreate(cardDataArray);
+
+    // Busca as cartas salvas com IDs reais do banco
+    const savedCards = await Card.findAll({ where: { gameId }, order: [['id', 'ASC']] });
+
+    // Cria deck de objetos { id, name } com IDs do banco
+    const deck = savedCards.map((record, i) => ({
+      id: record.id,
+      name: deckStrings[i]
+    }));
+
+    // Distribui cartas usando recursão (deck é modificado in-place via pop)
     const playerHands = this.dealCardsRecursive(playerNames, cardsPerPlayer, deck);
 
+    // Salva as mãos dos jogadores
     for (const gamePlayer of gamePlayers) {
       const name = gamePlayer.Player ? gamePlayer.Player.username : `Player${gamePlayer.playerId}`;
       await gamePlayer.update({ hand: playerHands[name] || [] });
     }
 
+    // Primeira carta vai para a pilha de descarte
     const firstCard = deck.pop();
+
+    // Restante fica no deck do jogo
     await game.update({ discardPile: [firstCard], deck: deck });
 
     return { message: 'Cards dealt successfully.', players: playerHands, firstCard };
@@ -381,15 +409,15 @@ class GameService {
    */
   async advanceTurnInDb(gameId, cardPlayed = null) {
     const { game, gamePlayers, playersNames, currentIndex } = await this.getLiveGameContext(gameId);
-    
+
     // Recupera direção atual salva no jogo (ou padrão)
     const currentDirection = game.direction || "clockwise";
 
     // Calcula o próximo estado usando a lógica unificada
     const result = await this.processCardLogic(
-      cardPlayed || "normal", 
-      currentIndex, 
-      playersNames, 
+      cardPlayed || "normal",
+      currentIndex,
+      playersNames,
       currentDirection
     );
 
@@ -415,13 +443,13 @@ class GameService {
   async playCardWithSkip(cardPlayed, currentPlayerIndex, players, direction = "clockwise") {
     const isSkipCard = cardPlayed.toLowerCase().includes('skip');
     const totalPlayers = players.length;
-    
+
     // Define o passo (1 para horário, -1 para anti-horário se implementado futuramente)
     const step = direction === "clockwise" ? 1 : -1;
 
     // Jogador que seria o próximo normalmente
     const skippedIndex = (currentPlayerIndex + step + totalPlayers) % totalPlayers;
-    
+
     let nextPlayerIndex;
 
     if (isSkipCard) {
@@ -448,7 +476,7 @@ class GameService {
   async playCardWithReverse(cardPlayed, currentPlayerIndex, players, direction = "clockwise") {
     const isReverseCard = cardPlayed.toLowerCase().includes('reverse');
     const totalPlayers = players.length;
-    
+
     // Inverte a direção se for uma carta Reverse
     let newDirection = direction;
     if (isReverseCard) {
@@ -519,14 +547,15 @@ class GameService {
 
     const deck = game.deck || [];
     const discardPile = game.discardPile || [];
-    const topCard = discardPile[discardPile.length - 1] || "";
+    const topCardObj = discardPile[discardPile.length - 1];
+    const topCardName = topCardObj ? (topCardObj.name || topCardObj) : "";
 
     // Executa a lógica de compra (utiliza o método que já definimos)
-    const result = await this.drawUntilPlayable(gamePlayer.hand, deck, topCard);
+    const result = await this.drawUntilPlayable(gamePlayer.hand, deck, topCardName);
 
     // Atualiza o baralho do jogo e a mão do jogador no Banco de Dados
     // Importante: No Sequelize, campos JSON devem ser atribuídos novamente para disparar o update
-    await game.update({ deck: deck }); 
+    await game.update({ deck: deck });
     await gamePlayer.update({ hand: result.newHand });
 
     return result;
@@ -540,12 +569,15 @@ class GameService {
     let playable = false;
 
     if (deck.length > 0) {
-      drawnCard = deck.shift(); 
+      drawnCard = deck.shift();
       newHand.push(drawnCard);
 
-      // Suporta formatos "blue_7" ou "Blue 7"
-      const topParts = currentCard.toLowerCase().split(/[ _]/);
-      const drawnParts = drawnCard.toLowerCase().split(/[ _]/);
+      // Suporta cartas como objetos { id, name } ou strings
+      const drawnCardName = (drawnCard.name || drawnCard).toString();
+      const currentCardName = (currentCard.name || currentCard).toString();
+
+      const topParts = currentCardName.toLowerCase().split(/[ _]/);
+      const drawnParts = drawnCardName.toLowerCase().split(/[ _]/);
 
       const sameColor = drawnParts[0] === topParts[0];
       const sameValue = drawnParts[1] && drawnParts[1] === topParts[1];
@@ -578,30 +610,120 @@ class GameService {
       order: [['id', 'ASC']]
     });
 
+    const playersNames = gamePlayers.map(gp => gp.Player.username);
     const playingPlayerIndex = gamePlayers.findIndex(gp => gp.Player && gp.Player.username === playerUsername);
     const currentPlayer = gamePlayers[playingPlayerIndex];
 
     if (!currentPlayer || !currentPlayer.isCurrentTurn) throw new Error('Não é sua vez');
 
     const playerHand = currentPlayer.hand || [];
-    if (!playerHand.includes(cardPlayed)) throw new Error('Carta não encontrada');
+    // Suporta cartas como objetos { id, name } ou strings
+    const cardIndex = playerHand.findIndex(c => {
+      const cardName = c.name || c;
+      return cardName === cardPlayed;
+    });
+    if (cardIndex === -1) throw new Error('Carta não encontrada na mão');
 
-    const newHand = playerHand.filter(c => c !== cardPlayed);
+    // Valida se a carta pode ser jogada (mesma cor, mesmo valor, ou Wild)
+    const discardPile = game.discardPile || [];
+    const topCardObj = discardPile[discardPile.length - 1];
+    const topCardName = topCardObj ? (topCardObj.name || topCardObj) : '';
+
+    const cardLower = cardPlayed.toLowerCase();
+    const topLower = topCardName.toLowerCase();
+    const isWild = cardLower.startsWith('wild');
+
+    if (!isWild && topCardName) {
+      const cardParts = cardPlayed.split(' ');
+      const topParts = topCardName.split(' ');
+      const activeColor = (game.currentColor || topParts[0]).toLowerCase();
+      const sameColor = cardParts[0].toLowerCase() === activeColor;
+      const sameValue = cardParts.slice(1).join(' ') === topParts.slice(1).join(' ');
+
+      if (!sameColor && !sameValue) {
+        throw new Error('Invalid card. Please play a card that matches the top card on the discard pile.');
+      }
+    }
+
+    // Se é Wild, chosenColor é obrigatório
+    if (isWild && !chosenColor) {
+      throw new Error('chosenColor é obrigatório para cartas Wild (Red, Blue, Green, Yellow)');
+    }
+
+    // Remove a carta da mão
+    const playedCardObj = playerHand[cardIndex];
+    const newHand = playerHand.filter((_, i) => i !== cardIndex);
     await currentPlayer.update({ hand: newHand, isCurrentTurn: false });
 
-    const discardPile = game.discardPile || [];
-    discardPile.push(cardPlayed);
-    await game.update({ discardPile });
+    // Adiciona à pilha de descarte
+    discardPile.push(playedCardObj);
+    const updateData = { discardPile };
 
+    // Se é Wild, salva a cor escolhida
+    if (isWild && chosenColor) {
+      updateData.currentColor = chosenColor;
+    } else {
+      // Limpa currentColor para usar a cor da carta jogada
+      updateData.currentColor = null;
+    }
+
+    // Verifica vitória
     if (newHand.length === 0) {
-      await game.update({ status: 'finished' });
+      updateData.status = 'finished';
+      await game.update(updateData);
       return { message: 'You won!', winner: playerUsername };
     }
 
-    const nextIndex = (playingPlayerIndex + 1) % gamePlayers.length;
-    await gamePlayers[nextIndex].update({ isCurrentTurn: true });
+    // Usa processCardLogic para calcular próximo jogador (Skip, Reverse)
+    const currentDirection = game.direction || 'clockwise';
+    const turnResult = await this.processCardLogic(
+      cardPlayed, playingPlayerIndex, playersNames, currentDirection
+    );
 
-    return { message: 'Card played successfully.', nextPlayer: gamePlayers[nextIndex].Player.username };
+    // Se a direção mudou (Reverse), salva
+    if (turnResult.newDirection !== currentDirection) {
+      updateData.direction = turnResult.newDirection;
+    }
+
+    await game.update(updateData);
+
+    // Transfere o turno
+    await GamePlayer.update({ isCurrentTurn: false }, { where: { gameId } });
+    await gamePlayers[turnResult.nextPlayerIndex].update({ isCurrentTurn: true });
+
+    // Draw Two: próximo jogador compra 2 cartas
+    if (cardLower.includes('draw two')) {
+      const nextPlayer = gamePlayers[turnResult.nextPlayerIndex];
+      const gameDeck = game.deck || [];
+      const nextHand = nextPlayer.hand || [];
+      for (let i = 0; i < 2 && gameDeck.length > 0; i++) {
+        nextHand.push(gameDeck.shift());
+      }
+      await nextPlayer.update({ hand: nextHand });
+      await game.update({ deck: gameDeck });
+    }
+
+    // Wild Draw Four: próximo jogador compra 4 cartas
+    if (cardLower.includes('wild draw four')) {
+      const nextPlayer = gamePlayers[turnResult.nextPlayerIndex];
+      const gameDeck = game.deck || [];
+      const nextHand = nextPlayer.hand || [];
+      for (let i = 0; i < 4 && gameDeck.length > 0; i++) {
+        nextHand.push(gameDeck.shift());
+      }
+      await nextPlayer.update({ hand: nextHand });
+      await game.update({ deck: gameDeck });
+    }
+
+    return {
+      message: 'Card played successfully.',
+      cardPlayed: cardPlayed,
+      nextPlayer: playersNames[turnResult.nextPlayerIndex],
+      direction: turnResult.newDirection,
+      skippedPlayer: turnResult.skippedPlayer,
+      remainingCards: newHand.length,
+      currentColor: isWild ? chosenColor : null
+    };
   }
 
   /**
@@ -618,7 +740,7 @@ class GameService {
     // Para cada cor, gera as cartas numéricas e de ação
     colors.forEach(color => {
       deck.push(`${color} 0`); // Apenas um '0' por cor
-      
+
       // Duas cartas de cada número (1-9) por cor
       numbers.slice(1).forEach(number => {
         deck.push(`${color} ${number}`);
@@ -658,7 +780,7 @@ class GameService {
     }
     return shuffled;
   }
-  
+
   /**
    * Distribui cartas aos jogadores de forma circular (Round-Robin) usando recursão.
    * @param {string[]} players - Lista de nomes dos jogadores
@@ -672,21 +794,21 @@ class GameService {
   dealCardsRecursive(players, cards, deck, hands = {}, pIdx = 0, round = 0) {
     // Caso base: se atingiu o número de cartas por jogador, encerra a recursão
     if (round >= cards) return hands;
-    
+
     const p = players[pIdx];
-    
+
     // Inicializa a mão do jogador se não existir
     if (!hands[p]) hands[p] = [];
-    
+
     // Retira uma carta do baralho e entrega ao jogador atual
     if (deck.length > 0) {
-        hands[p].push(deck.pop());
+      hands[p].push(deck.pop());
     }
 
     // Calcula o próximo jogador e verifica se completou uma rodada de distribuição
     const nextP = (pIdx + 1) % players.length;
     const nextRound = nextP === 0 ? round + 1 : round;
-    
+
     return this.dealCardsRecursive(players, cards, deck, hands, nextP, nextRound);
   }
 
@@ -703,11 +825,13 @@ class GameService {
   *findValidCardsRecursive(hand, topCard, currentColor, index = 0) {
     // Caso base: fim do array
     if (index >= hand.length) return;
-    
+
     const card = hand[index];
-    // Assume formato "Cor Valor" (ex: "Red 7")
-    const topParts = topCard.split(' ');
-    const cardParts = card.split(' ');
+    // Suporta cartas como objetos { id, name } ou strings
+    const cardName = (card.name || card).toString();
+    const topCardName = (topCard.name || topCard).toString();
+    const topParts = topCardName.split(' ');
+    const cardParts = cardName.split(' ');
 
     // Regras de validação:
     // 1. É carta curinga (Wild)
@@ -718,9 +842,9 @@ class GameService {
     const sameValue = cardParts[1] && cardParts[1] === topParts[1];
 
     if (isWild || sameColor || sameValue) {
-        yield card;
+      yield card;
     }
-    
+
     // Chamada recursiva para o próximo índice (yield* delega para o próximo generator)
     yield* this.findValidCardsRecursive(hand, topCard, currentColor, index + 1);
   }

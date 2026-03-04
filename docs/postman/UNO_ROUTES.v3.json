@@ -608,6 +608,180 @@
             "description": "Distribui cartas aos jogadores usando recursão. O parâmetro cardsPerPlayer é opcional (padrão: 7)."
           },
           "response": []
+        },
+        {
+          "name": "playCard",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Red 7\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": [
+                "{{url}}{{games}}/play-card"
+              ]
+            },
+            "description": "Joga uma carta normal. A carta deve combinar em cor ou valor com a carta do topo da pilha de descarte."
+          },
+          "response": []
+        },
+        {
+          "name": "playCard - Reverse",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Red Reverse\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": [
+                "{{url}}{{games}}/play-card"
+              ]
+            },
+            "description": "Joga uma carta Reverse. Inverte a ordem dos turnos (clockwise para counterclockwise e vice-versa)."
+          },
+          "response": []
+        },
+        {
+          "name": "playCard - Skip",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\",\n  \"cardPlayed\": \"Red Skip\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/play-card",
+              "host": [
+                "{{url}}{{games}}/play-card"
+              ]
+            },
+            "description": "Joga uma carta Skip. Pula o turno do próximo jogador."
+          },
+          "response": []
+        },
+        {
+          "name": "validCards",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1,\n  \"player\": \"safira\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/valid-cards",
+              "host": [
+                "{{url}}{{games}}/valid-cards"
+              ]
+            },
+            "description": "Retorna as cartas válidas que o jogador pode jogar no turno atual."
+          },
+          "response": []
+        },
+        {
+          "name": "drawCard",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/drawCard",
+              "host": [
+                "{{url}}{{games}}/drawCard"
+              ]
+            },
+            "description": "Compra uma carta do baralho quando não há jogada possível."
+          },
+          "response": []
+        },
+        {
+          "name": "nextTurn",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"game_id\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{url}}{{games}}/nextTurn",
+              "host": [
+                "{{url}}{{games}}/nextTurn"
+              ]
+            },
+            "description": "Avança para o próximo turno do jogo."
+          },
+          "response": []
         }
       ]
     },
@@ -737,12 +911,19 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{url}}{{cards}}",
+              "raw": "{{url}}{{cards}}?game_id=1",
               "host": [
                 "{{url}}{{cards}}"
+              ],
+              "query": [
+                {
+                  "key": "game_id",
+                  "value": "1",
+                  "description": "Filtrar cartas por game_id (opcional)"
+                }
               ]
             },
-            "description": "Lista todas as cartas"
+            "description": "Lista todas as cartas. Use o query param game_id para filtrar por jogo."
           },
           "response": []
         },

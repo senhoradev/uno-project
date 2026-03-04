@@ -18,9 +18,9 @@ const GameResponseDTO = require('../DTO/Response/GameRespondeDTO');
 exports.create = async (req, res) => {
   try {
     const game = await gameService.createGame(req.body, req.user.id);
-    return res.status(201).json({ 
-      message: "Game created successfully", 
-      game_id: game.id 
+    return res.status(201).json({
+      message: "Game created successfully",
+      game_id: game.id
     });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -53,9 +53,9 @@ exports.toggleReady = async (req, res) => {
   try {
     const { game_id } = req.body;
     const result = await gameService.toggleReady(game_id, req.user.id);
-    return res.json({ 
+    return res.json({
       message: result.message,
-      isReady: result.isReady 
+      isReady: result.isReady
     });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -122,32 +122,6 @@ exports.nextTurn = async (req, res) => {
   }
 };
 
-/**
- * Joga uma carta e gerencia as consequências (Skip, Reverse, Turno).
- * @param {Object} req - Requisição (game_id, cardPlayed e user.id autenticado)
- * @param {Object} res - Objeto de resposta
- * @returns {Promise<Object>} Estado atualizado do turno
- */
-exports.playCard = async (req, res) => {
-  try {
-    const { game_id, cardPlayed } = req.body;
-    const userId = req.user.id; // Jogador autenticado
-
-    if (!game_id || !cardPlayed) {
-      return res.status(400).json({ error: 'game_id e cardPlayed são obrigatórios' });
-    }
-
-    // O serviço valida se é a vez do usuário, remove a carta da mão e muda o turno
-    const result = await gameService.playCardInDb(game_id, userId, cardPlayed);
-
-    return res.status(200).json({
-      status: 200,
-      body: result
-    });
-  } catch (error) {
-    return res.status(400).json({ error: error.message });
-  }
-};
 
 /**
  * Compra uma carta do baralho oficial da partida.
@@ -277,7 +251,7 @@ exports.getScores = async (req, res) => {
 
     if (result.isSuccess) {
       const formattedResponse = GameResponseDTO.scoresResponse(
-        result.value.gameId, 
+        result.value.gameId,
         result.value.scores
       );
 
@@ -354,7 +328,7 @@ exports.delete = async (req, res) => {
 exports.dealCards = async (req, res) => {
   try {
     const { game_id, cardsPerPlayer = 7 } = req.body;
-    
+
     if (!game_id) {
       return res.status(400).json({ error: 'game_id é obrigatório' });
     }
@@ -378,15 +352,15 @@ exports.dealCards = async (req, res) => {
 exports.playCard = async (req, res) => {
   try {
     const { game_id, player, cardPlayed, chosenColor } = req.body;
-    
+
     if (!game_id) {
       return res.status(400).json({ error: 'game_id é obrigatório' });
     }
-    
+
     if (!player) {
       return res.status(400).json({ error: 'player é obrigatório' });
     }
-    
+
     if (!cardPlayed) {
       return res.status(400).json({ error: 'cardPlayed é obrigatório' });
     }
@@ -413,11 +387,11 @@ exports.playCard = async (req, res) => {
 exports.getValidCards = async (req, res) => {
   try {
     const { game_id, player } = req.body;
-    
+
     if (!game_id) {
       return res.status(400).json({ error: 'game_id é obrigatório' });
     }
-    
+
     if (!player) {
       return res.status(400).json({ error: 'player é obrigatório' });
     }
@@ -442,16 +416,18 @@ exports.getValidCards = async (req, res) => {
 
     const playerHand = gamePlayer.hand || [];
     const discardPile = game.discardPile || [];
-    const topCard = discardPile[discardPile.length - 1];
+    const topCardObj = discardPile[discardPile.length - 1];
 
-    if (!topCard) {
+    if (!topCardObj) {
       return res.status(400).json({ error: 'Não há carta na pilha de descarte' });
     }
+
+    const topCard = topCardObj.name || topCardObj;
 
     // Usa o generator recursivo para encontrar cartas válidas
     const validCards = [];
     const generator = gameService.findValidCardsRecursive(playerHand, topCard, game.currentColor);
-    
+
     for (const card of generator) {
       validCards.push(card);
     }
