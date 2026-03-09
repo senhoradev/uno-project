@@ -128,6 +128,16 @@ const Game = sequelize.define('Game', {
     defaultValue: [],
     allowNull: false,
     comment: "Armazena as cartas restantes no baralho para compra"
+  },
+  /**
+   * Direção do jogo (clockwise ou counterclockwise)
+   * @type {string}
+   */
+  direction: {
+    type: DataTypes.STRING,
+    defaultValue: 'clockwise',
+    allowNull: false,
+    comment: "Direção atual do jogo: clockwise ou counterclockwise"
   }
 });
 

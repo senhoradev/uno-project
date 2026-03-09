@@ -2,10 +2,12 @@ const gameService = require('../../src/services/gameService');
 const Game = require('../../src/models/game');
 const GamePlayer = require('../../src/models/gamePlayer');
 const Player = require('../../src/models/player');
+const Card = require('../../src/models/card');
 
 jest.mock('../../src/models/game');
 jest.mock('../../src/models/gamePlayer');
 jest.mock('../../src/models/player');
+jest.mock('../../src/models/card');
 
 describe('GameService', () => {
   beforeEach(() => {
@@ -106,7 +108,7 @@ describe('GameService', () => {
         isReady: false,
         update: jest.fn().mockResolvedValue({ isReady: true })
       };
-      
+
       jest.spyOn(gameService, 'getGameById').mockResolvedValue(mockGame);
       GamePlayer.findOne.mockResolvedValue(mockGamePlayer);
 
@@ -240,7 +242,7 @@ describe('GameService', () => {
   describe('getCurrentPlayer', () => {
     test('retorna jogador da vez', async () => {
       const mockPlayer = { playerId: 1, Player: { username: 'player1' } };
-      
+
       Game.findByPk.mockResolvedValue({ id: 1 });
       GamePlayer.findOne.mockResolvedValue(mockPlayer);
 

@@ -18,9 +18,9 @@ const GameResponseDTO = require('../DTO/Response/GameRespondeDTO');
 exports.create = async (req, res) => {
   try {
     const game = await gameService.createGame(req.body, req.user.id);
-    return res.status(201).json({ 
-      message: "Game created successfully", 
-      game_id: game.id 
+    return res.status(201).json({
+      message: "Game created successfully",
+      game_id: game.id
     });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -53,9 +53,9 @@ exports.toggleReady = async (req, res) => {
   try {
     const { game_id } = req.body;
     const result = await gameService.toggleReady(game_id, req.user.id);
-    return res.json({ 
+    return res.json({
       message: result.message,
-      isReady: result.isReady 
+      isReady: result.isReady
     });
   } catch (error) {
     return res.status(400).json({ error: error.message });
@@ -92,6 +92,59 @@ exports.leave = async (req, res) => {
     return res.json({ message: 'User left the game successfully' });
   } catch (error) {
     return res.status(400).json({ error: error.message });
+  }
+};
+
+/**
+ * Avança para o próximo turno consultando o estado real do jogo.
+ * @param {Object} req - Objeto de requisição contendo game_id no corpo
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Objeto com o próximo jogador e seu índice
+ */
+exports.nextTurn = async (req, res) => {
+  try {
+    const { game_id } = req.body; // Recebe apenas o ID
+
+    if (!game_id) return res.status(400).json({ error: 'game_id é obrigatório' });
+
+    // O serviço agora busca quem é o próximo e atualiza o banco
+    const result = await gameService.advanceTurnInDb(game_id);
+
+    return res.status(200).json({
+      status: 200,
+      body: {
+        nextPlayer: result.nextPlayer,
+        nextPlayerIndex: result.nextPlayerIndex
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+
+/**
+ * Compra uma carta do baralho oficial da partida.
+ * @param {Object} req - Requisição (game_id e user.id autenticado)
+ * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Resultado da compra (nova mão e carta comprada)
+ */
+exports.drawCard = async (req, res) => {
+  try {
+    const { game_id } = req.body;
+    const userId = req.user.id;
+
+    if (!game_id) return res.status(400).json({ error: 'game_id é obrigatório' });
+
+    // Busca o deck e a mão no banco, processa a compra e salva
+    const result = await gameService.drawCardInDb(game_id, userId);
+
+    return res.status(200).json({
+      status: 200,
+      body: result
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -198,7 +251,7 @@ exports.getScores = async (req, res) => {
 
     if (result.isSuccess) {
       const formattedResponse = GameResponseDTO.scoresResponse(
-        result.value.gameId, 
+        result.value.gameId,
         result.value.scores
       );
 
@@ -275,7 +328,7 @@ exports.delete = async (req, res) => {
 exports.dealCards = async (req, res) => {
   try {
     const { game_id, cardsPerPlayer = 7 } = req.body;
-    
+
     if (!game_id) {
       return res.status(400).json({ error: 'game_id é obrigatório' });
     }
@@ -299,15 +352,15 @@ exports.dealCards = async (req, res) => {
 exports.playCard = async (req, res) => {
   try {
     const { game_id, player, cardPlayed, chosenColor } = req.body;
-    
+
     if (!game_id) {
       return res.status(400).json({ error: 'game_id é obrigatório' });
     }
-    
+
     if (!player) {
       return res.status(400).json({ error: 'player é obrigatório' });
     }
-    
+
     if (!cardPlayed) {
       return res.status(400).json({ error: 'cardPlayed é obrigatório' });
     }
@@ -324,25 +377,25 @@ exports.playCard = async (req, res) => {
 };
 
 /**
- * Obtém as cartas válidas que um jogador pode jogar (usando recursão/generator)
+ * Obtém as cartas válidas que um jogador pode jogar (usando recursão/generator).
  * @param {Object} req - Objeto de requisição
  * @param {number} req.body.game_id - ID do jogo
  * @param {string} req.body.player - Nome do jogador
  * @param {Object} res - Objeto de resposta
+ * @returns {Promise<Object>} Lista de cartas válidas e carta do topo
  */
 exports.getValidCards = async (req, res) => {
   try {
     const { game_id, player } = req.body;
-    
+
     if (!game_id) {
       return res.status(400).json({ error: 'game_id é obrigatório' });
     }
-    
+
     if (!player) {
       return res.status(400).json({ error: 'player é obrigatório' });
     }
 
-    
     const game = await Game.findByPk(game_id);
     if (!game) {
       return res.status(404).json({ error: 'Jogo não encontrado' });
@@ -363,16 +416,18 @@ exports.getValidCards = async (req, res) => {
 
     const playerHand = gamePlayer.hand || [];
     const discardPile = game.discardPile || [];
-    const topCard = discardPile[discardPile.length - 1];
+    const topCardObj = discardPile[discardPile.length - 1];
 
-    if (!topCard) {
+    if (!topCardObj) {
       return res.status(400).json({ error: 'Não há carta na pilha de descarte' });
     }
+
+    const topCard = topCardObj.name || topCardObj;
 
     // Usa o generator recursivo para encontrar cartas válidas
     const validCards = [];
     const generator = gameService.findValidCardsRecursive(playerHand, topCard, game.currentColor);
-    
+
     for (const card of generator) {
       validCards.push(card);
     }

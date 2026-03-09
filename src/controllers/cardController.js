@@ -1,5 +1,15 @@
 const cardService = require('../services/cardService');
 
+exports.getAll = async (req, res) => {
+  try {
+    const { game_id } = req.query;
+    const cards = await cardService.getAllCards(game_id);
+    res.json(cards);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     const card = await cardService.createCard(req.body);

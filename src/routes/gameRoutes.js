@@ -50,31 +50,42 @@ router.post('/ready', auth, gameController.toggleReady);
  * @returns {Object} 200 - Jogo iniciado com sucesso
  */
 router.post('/start', auth, gameController.start);
+
+/**
+ * @route POST /api/games/leave
+ * @description Permite que um usuário abandone um jogo em andamento
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Mensagem de sucesso
+ */
 router.post('/leave', auth, gameController.leave);
-router.post('/end', auth, gameController.end); 
+
+/**
+ * @route POST /api/games/end
+ * @description Finaliza um jogo (apenas o criador pode finalizar)
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Mensagem de sucesso
+ */
+router.post('/end', auth, gameController.end);
+
+/**
+ * @route POST /api/games/state
+ * @description Obtém o estado atual do jogo (status)
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Objeto com ID e status do jogo
+ */
 router.post('/state', auth, gameController.getState);
+
+/**
+ * @route POST /api/games/players
+ * @description Obtém a lista de jogadores de um jogo
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Lista de nomes dos jogadores
+ */
 router.post('/players', auth, gameController.getPlayers);
-
-/**
- * @route GET /api/games/:id
- * @description Busca um jogo pelo ID
- * @access Public
- */
-router.get('/:id', gameController.getById);
-
-/**
- * @route PUT /api/games/:id
- * @description Atualiza um jogo existente
- * @access Public
- */
-router.put('/:id', gameController.update);
-
-/**
- * @route DELETE /api/games/:id
- * @description Remove um jogo do sistema
- * @access Public
- */
-router.delete('/:id', gameController.delete);
 
 /**
  * @route POST /api/games/current-player
@@ -110,20 +121,6 @@ router.post('/scores', auth, gameController.getScores);
  * @body {number} game_id - ID do jogo
  * @body {number} [cardsPerPlayer=7] - Número de cartas por jogador (padrão: 7)
  * @returns {Object} 200 - Cartas distribuídas com sucesso
- * @example
- * Request body:
- * {
- *   "game_id": 1,
- *   "cardsPerPlayer": 7
- * }
- * Response:
- * {
- *   "message": "Cards dealt successfully.",
- *   "players": {
- *     "Player1": ["Red 3", "Blue Skip", "Green 7", ...],
- *     "Player2": ["Yellow Reverse", "Red 5", "Blue Draw Two", ...]
- *   }
- * }
  */
 router.post('/deal-cards', auth, gameController.dealCards);
 
@@ -133,28 +130,10 @@ router.post('/deal-cards', auth, gameController.dealCards);
  * @access Private (Requer Token)
  * @body {number} game_id - ID do jogo
  * @body {string} player - Nome do jogador
- * @body {string} cardPlayed - Carta a ser jogada
+ * @body {string} cardPlayed - Carta a ser jogada (ex: "Red 7", "Blue Skip", "Green Reverse", "Wild")
  * @body {string} [chosenColor] - Cor escolhida (obrigatório para cartas Wild: "Red", "Blue", "Green", "Yellow")
  * @returns {Object} 200 - Carta jogada com sucesso
  * @returns {Object} 400 - Carta inválida
- * @example
- * Request body:
- * {
- *   "game_id": 1,
- *   "player": "Player1",
- *   "cardPlayed": "Green 7"
- * }
- * Response (200 OK):
- * {
- *   "message": "Card played successfully.",
- *   "cardPlayed": "Green 7",
- *   "nextPlayer": "Player2",
- *   "remainingCards": 6
- * }
- * Response (400 Bad Request):
- * {
- *   "message": "Invalid card. Please play a card that matches the top card on the discard pile."
- * }
  */
 router.put('/play-card', auth, gameController.playCard);
 
@@ -165,21 +144,51 @@ router.put('/play-card', auth, gameController.playCard);
  * @body {number} game_id - ID do jogo
  * @body {string} player - Nome do jogador
  * @returns {Object} 200 - Lista de cartas válidas
- * @example
- * Request body:
- * {
- *   "game_id": 1,
- *   "player": "Player1"
- * }
- * Response:
- * {
- *   "player": "Player1",
- *   "topCard": "Red 7",
- *   "currentColor": null,
- *   "validCards": ["Red 3", "Red Skip", "Green 7", "Wild"],
- *   "totalValidCards": 4
- * }
  */
 router.post('/valid-cards', auth, gameController.getValidCards);
+
+/**
+ * @route POST /api/games/nextTurn
+ * @description Calcula o próximo turno no sentido horário
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Índice e nome do próximo jogador
+ */
+router.post('/nextTurn', auth, gameController.nextTurn);
+
+/**
+ * @route POST /api/games/drawCard
+ * @description Compra uma carta do baralho quando não há jogada possível
+ * @access Private (Requer Token)
+ * @body {number} game_id - ID do jogo
+ * @returns {Object} 200 - Nova mão, carta comprada e se é jogável
+ */
+router.post('/drawCard', auth, gameController.drawCard);
+
+// =============================================
+// Rotas com parâmetro :id devem ficar por último
+// para não interceptar rotas nomeadas acima
+// =============================================
+
+/**
+ * @route GET /api/games/:id
+ * @description Busca um jogo pelo ID
+ * @access Public
+ */
+router.get('/:id', gameController.getById);
+
+/**
+ * @route PUT /api/games/:id
+ * @description Atualiza um jogo existente
+ * @access Public
+ */
+router.put('/:id', gameController.update);
+
+/**
+ * @route DELETE /api/games/:id
+ * @description Remove um jogo do sistema
+ * @access Public
+ */
+router.delete('/:id', gameController.delete);
 
 module.exports = router;

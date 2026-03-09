@@ -3,6 +3,13 @@ const Card = require('../models/card');
 const CardRepository = require('../Repository/cardRepository');
 
 class CardService {
+  async getAllCards(gameId) {
+    if (gameId) {
+      return await Card.findAll({ where: { gameId } });
+    }
+    return await Card.findAll();
+  }
+
   async createCard(data) {
     return await CardRepository.saveCard(data);
   }
